@@ -1,0 +1,22 @@
+# Ignore les environnements virtuels
+venv/
+.env/
+
+# Ignore les fichiers de logs
+*.log
+
+# Ignore les fichiers de cache Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Ignore les fichiers temporaires ou systèmes
+*.swp
+*.swo
+.DS_Store
+*.tmp
+*.bak
+
+# Ignore les fichiers de configuration DDEV
+.ddev/

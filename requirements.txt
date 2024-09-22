@@ -1,0 +1,7 @@
+flask
+nltk==3.8.1
+spacy
+transformers
+torch
+flask-limiter
+scikit-learn
