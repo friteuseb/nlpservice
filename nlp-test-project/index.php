@@ -48,33 +48,38 @@ $similarities = Analyzer::calculateAllSimilarities();
         </div>
     </div>
 
-    <script>
-    <?php
+<script>
+<?php
     foreach ($analyses as $title => $analysis) {
         renderSentimentChart($title, $analysis);
     }
     ?>
-
+document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('liveTestForm').addEventListener('submit', function(e) {
         e.preventDefault();
         var text = document.getElementById('textInput').value;
         var resultDiv = document.getElementById('liveResult');
         resultDiv.innerHTML = '<p>Chargement en cours...</p>';
         
-        fetch('/api/analyze', {
+        console.log('Texte à analyser:', text);
+
+        fetch('https://nlpservice.semantic-suggestion.com/api/analyze', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({content: btoa(text)}),
+            body: JSON.stringify({content: btoa(unescape(encodeURIComponent(text)))}),
+            mode: 'cors',
         })
         .then(response => {
+            console.log('Statut de la réponse:', response.status);
             if (!response.ok) {
                 throw new Error('Erreur réseau: ' + response.status);
             }
             return response.json();
         })
         .then(data => {
+            console.log('Données reçues:', data);
             if (data.error) {
                 throw new Error(data.error);
             }
@@ -82,11 +87,12 @@ $similarities = Analyzer::calculateAllSimilarities();
             resultDiv.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
         })
         .catch((error) => {
-            console.error('Error:', error);
+            console.error('Erreur:', error);
             resultDiv.innerHTML = '<h3>Erreur</h3><p>' + error.message + '</p>';
         });
     });
-    </script>
+});
+</script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
