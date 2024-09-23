@@ -26,17 +26,18 @@ class NLPAnalyzer:
         try:
             nltk.download('punkt', quiet=True)
             nltk.download('stopwords', quiet=True)
-            self.nlp = spacy.load("fr_core_news_lg")
+            self.nlp = spacy.load("fr_core_news_md")  # ou "fr_core_news_sm" ou lg
             self.sentiment_analyzer = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
             self.emotion_analyzer = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
             self.stop_words = set(stopwords.words('french'))
             self.SPACY_AVAILABLE = True
-            self.TRANSFORMERS_AVAILABLE = True
             self.logger.info("All resources loaded successfully")
         except Exception as e:
             self.logger.error(f"Error loading resources: {str(e)}")
             self.SPACY_AVAILABLE = False
             self.TRANSFORMERS_AVAILABLE = False
+            self.nlp = None  # Ajouter cette ligne pour éviter d'utiliser `self.nlp` s'il n'est pas chargé
+
 
 
     def analyze_text(self, text):
@@ -66,6 +67,10 @@ class NLPAnalyzer:
             raise
 
     def analyze_sentiment(self, text, generate_graph=False):
+        if not self.SPACY_AVAILABLE:
+            self.logger.error("spaCy model is not available. Cannot perform sentiment analysis.")
+            return {"error": "spaCy model not available"}
+        
         sentences = self.nlp(text).sents
         sentiments = [self.sentiment_analyzer(str(sent))[0] for sent in sentences]
         
