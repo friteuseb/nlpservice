@@ -11,6 +11,8 @@ import io
 import base64
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.cluster import KMeans
+from sklearn.decomposition import LatentDirichletAllocation
 import numpy as np
 
 class NLPAnalyzer:
@@ -100,27 +102,19 @@ class NLPAnalyzer:
             overall_sentiment = self.sentiment_analyzer(text[:512])[0]
             emotions = self.emotion_analyzer(text[:512])[0]
             
-            avg_score = sum(float(s['score']) for s in sentiments) / len(sentiments) if sentiments else 0
+            # Calculate sentiment distribution
+            sentiment_counts = Counter(s['label'] for s in sentiments)
+            total_sentences = len(sentiments)
+            sentiment_distribution = {label: count / total_sentences for label, count in sentiment_counts.items()}
             
             sentiment_graph_base64 = None
             if generate_graph:
-                plt.figure(figsize=(10, 5))
-                plt.plot([s['label'] for s in sentiments], [float(s['score']) for s in sentiments], marker='o')
-                plt.title("Évolution du sentiment à travers le texte")
-                plt.xlabel("Phrases")
-                plt.ylabel("Score de sentiment")
-                plt.xticks(rotation=45)
-
-                buf = io.BytesIO()
-                plt.savefig(buf, format='png')
-                buf.seek(0)
-                sentiment_graph_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
-                plt.close()
+                sentiment_graph_base64 = self._generate_sentiment_graph(sentiment_distribution)
             
             return {
                 "overall_sentiment": overall_sentiment['label'],
                 "overall_score": float(overall_sentiment['score']),
-                "average_score": avg_score,
+                "sentiment_distribution": sentiment_distribution,
                 "sentence_sentiments": [{"text": str(sent), "sentiment": sent_analysis['label'], "score": float(sent_analysis['score'])} 
                                         for sent, sent_analysis in zip(sentences, sentiments)],
                 "dominant_emotion": emotions['label'],
@@ -130,6 +124,22 @@ class NLPAnalyzer:
         except Exception as e:
             self.logger.error(f"Error in sentiment analysis: {str(e)}")
             return {"error": f"Sentiment analysis failed: {str(e)}"}
+
+    def _generate_sentiment_graph(self, sentiment_distribution):
+        plt.figure(figsize=(10, 5))
+        plt.bar(sentiment_distribution.keys(), sentiment_distribution.values())
+        plt.title("Distribution des sentiments dans le texte")
+        plt.xlabel("Sentiments")
+        plt.ylabel("Proportion")
+        plt.ylim(0, 1)  # Set y-axis limit from 0 to 1 for percentage
+
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        graph_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+        plt.close()
+        
+        return graph_base64
 
 
     def extract_keyphrases(self, text):
@@ -172,16 +182,26 @@ class NLPAnalyzer:
         return len(set(words)) / len(words) if words else 0
 
     def extract_top_n_grams(self, text, n=2, top=5):
-        # Tokenisation et mise en minuscules
-        words = word_tokenize(text.lower(), language='french')
+        if not self.SPACY_AVAILABLE:
+            self.logger.warning("spaCy not available, falling back to basic n-gram extraction")
+            return self._basic_extract_top_n_grams(text, n, top)
         
-        # Filtrage des mots vides et de la ponctuation
-        filtered_words = [word for word in words if word.isalnum() and word not in self.stop_words]
+        doc = self.nlp(text.lower())
+        
+        # Filtrage des mots : garder seulement les noms, verbes, adjectifs qui ne sont pas des stop words
+        filtered_words = [token.lemma_ for token in doc if token.pos_ in {'NOUN', 'VERB', 'ADJ'} 
+                        and token.lemma_ not in self.stop_words and token.lemma_.isalnum()]
         
         # Génération des n-grams
         n_grams = list(ngrams(filtered_words, n))
         
         # Comptage et retour des top n-grams
+        return Counter(n_grams).most_common(top)
+
+    def _basic_extract_top_n_grams(self, text, n=2, top=5):
+        words = word_tokenize(text.lower(), language='french')
+        filtered_words = [word for word in words if word.isalnum() and word not in self.stop_words]
+        n_grams = list(ngrams(filtered_words, n))
         return Counter(n_grams).most_common(top)
 
     def calculate_semantic_coherence(self, text):
@@ -216,3 +236,72 @@ class NLPAnalyzer:
             except Exception as e:
                 self.logger.error(f"Error in similarity calculation: {str(e)}")
                 raise
+
+    def extract_topics(self, texts, method='lda', num_topics=5):
+        vectorizer = TfidfVectorizer(max_features=1000, stop_words=self.stop_words)
+        X = vectorizer.fit_transform(texts)
+        feature_names = vectorizer.get_feature_names()
+        
+        if method == 'lda':
+            model = LatentDirichletAllocation(n_components=num_topics, random_state=42)
+        elif method == 'kmeans':
+            model = KMeans(n_clusters=num_topics, random_state=42)
+        else:
+            raise ValueError("Method must be 'lda' or 'kmeans'")
+        
+        model.fit(X)
+        
+        topics = []
+        if method == 'lda':
+            for topic_idx, topic in enumerate(model.components_):
+                top_words = [feature_names[i] for i in topic.argsort()[:-10 - 1:-1]]
+                topics.append({"id": topic_idx, "words": top_words})
+        else:  # kmeans
+            order_centroids = model.cluster_centers_.argsort()[:, ::-1]
+            for i in range(num_topics):
+                top_words = [feature_names[ind] for ind in order_centroids[i, :10]]
+                topics.append({"id": i, "words": top_words})
+        
+        return topics
+
+    def _lda_topics(self, texts, num_topics):
+        vectorizer = TfidfVectorizer(max_features=1000, stop_words=self.stop_words)
+        X = vectorizer.fit_transform(texts)
+        
+        lda = LatentDirichletAllocation(n_components=num_topics, random_state=42)
+        lda.fit(X)
+        
+        feature_names = vectorizer.get_feature_names()
+        topics = []
+        for topic_idx, topic in enumerate(lda.components_):
+            top_words = [feature_names[i] for i in topic.argsort()[:-10 - 1:-1]]
+            topics.append({"id": topic_idx, "words": top_words})
+        
+        return topics
+
+    def _kmeans_topics(self, texts, num_clusters):
+        vectorizer = TfidfVectorizer(max_features=1000, stop_words=self.stop_words)
+        X = vectorizer.fit_transform(texts)
+        
+        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+        kmeans.fit(X)
+        
+        order_centroids = kmeans.cluster_centers_.argsort()[:, ::-1]
+        terms = vectorizer.get_feature_names()
+        
+        topics = []
+        for i in range(num_clusters):
+            top_words = [terms[ind] for ind in order_centroids[i, :10]]
+            topics.append({"id": i, "words": top_words})
+        
+        return topics
+
+    def cluster_texts(self, texts, num_clusters=5):
+        vectorizer = TfidfVectorizer(max_features=1000, stop_words=self.stop_words)
+        X = vectorizer.fit_transform(texts)
+        
+        kmeans = KMeans(n_clusters=num_clusters, random_state=42)
+        kmeans.fit(X)
+        
+        clusters = [{"text": text, "cluster": cluster} for text, cluster in zip(texts, kmeans.labels_)]
+        return clusters
