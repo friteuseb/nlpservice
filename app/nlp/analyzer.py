@@ -100,9 +100,6 @@ class NLPAnalyzer:
             "emotion_score": float(emotions['score']),
             "sentiment_graph": img_base64
         }
-        except Exception as e:
-            self.logger.error(f"Error in sentiment analysis: {str(e)}")
-            return "UNKNOWN"
 
     def extract_keyphrases(self, text):
         words = word_tokenize(text.lower(), language='french')

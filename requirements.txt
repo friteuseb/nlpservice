@@ -6,3 +6,4 @@ torch
 flask-limiter
 scikit-learn
 flask_cors
+matplotlib
