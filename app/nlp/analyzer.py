@@ -6,6 +6,9 @@ from collections import Counter
 import logging
 import spacy
 from transformers import pipeline
+import matplotlib.pyplot as plt
+import io
+import base64
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
@@ -14,6 +17,8 @@ class NLPAnalyzer:
     def __init__(self):
         self.setup_logging()
         self.load_resources()
+        self.sentiment_analyzer = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
+        self.emotion_analyzer = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
 
     def setup_logging(self):
         logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -39,7 +44,7 @@ class NLPAnalyzer:
         
         try:
             result = {
-                "sentiment": self.analyze_sentiment(text),
+                "sentiment_analysis": self.analyze_sentiment(text),  # Nouvelle méthode détaillée
                 "keyphrases": self.extract_keyphrases(text),
                 "category": self.categorize_text(text),
                 "named_entities": self.extract_named_entities(text),
@@ -50,7 +55,6 @@ class NLPAnalyzer:
                 "lexical_diversity": self.calculate_lexical_diversity(text),
                 "top_n_grams": self.extract_top_n_grams(text),
                 "semantic_coherence": self.calculate_semantic_coherence(text),
-                "sentiment_distribution": self.analyze_sentiment_distribution(text)
             }
             
             result["average_sentence_length"] = result["word_count"] / result["sentence_count"] if result["sentence_count"] > 0 else 0
@@ -62,22 +66,40 @@ class NLPAnalyzer:
             raise
 
     def analyze_sentiment(self, text):
-        try:
-            if self.TRANSFORMERS_AVAILABLE:
-                result = self.sentiment_analyzer(text[:512])[0]
-                return result['label']
-            else:
-                # Fallback method
-                positive_words = set(['bon', 'excellent', 'super', 'génial', 'heureux'])
-                negative_words = set(['mauvais', 'terrible', 'horrible', 'triste', 'déçu'])
-                words = word_tokenize(text.lower(), language='french')
-                sentiment_score = sum(1 for word in words if word in positive_words) - sum(1 for word in words if word in negative_words)
-                if sentiment_score > 0:
-                    return "POSITIVE"
-                elif sentiment_score < 0:
-                    return "NEGATIVE"
-                else:
-                    return "NEUTRAL"
+        sentences = self.nlp(text).sents
+        sentiments = [self.sentiment_analyzer(str(sent))[0] for sent in sentences]
+        
+        overall_sentiment = self.sentiment_analyzer(text[:512])[0]
+        emotions = self.emotion_analyzer(text[:512])[0]
+        
+        # Calculer les scores moyens
+        avg_score = sum(float(s['score']) for s in sentiments) / len(sentiments)
+        
+        # Créer un graphique
+        plt.figure(figsize=(10, 5))
+        plt.plot([s['label'] for s in sentiments], [float(s['score']) for s in sentiments], marker='o')
+        plt.title("Évolution du sentiment à travers le texte")
+        plt.xlabel("Phrases")
+        plt.ylabel("Score de sentiment")
+        plt.xticks(rotation=45)
+        
+        # Convertir le graphique en image base64
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        buf.seek(0)
+        img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+        plt.close()
+        
+        return {
+            "overall_sentiment": overall_sentiment['label'],
+            "overall_score": float(overall_sentiment['score']),
+            "average_score": avg_score,
+            "sentence_sentiments": [{"text": str(sent), "sentiment": sent_analysis['label'], "score": float(sent_analysis['score'])} 
+                                    for sent, sent_analysis in zip(sentences, sentiments)],
+            "dominant_emotion": emotions['label'],
+            "emotion_score": float(emotions['score']),
+            "sentiment_graph": img_base64
+        }
         except Exception as e:
             self.logger.error(f"Error in sentiment analysis: {str(e)}")
             return "UNKNOWN"

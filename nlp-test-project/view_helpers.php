@@ -21,8 +21,7 @@ function displayAnalysis($title, $text, $analysis) {
     echo "</div>";
     echo "<div class='col-md-6'>";
     echo "<h5>Analyse du sentiment</h5>";
-    echo "<p>Sentiment dominant : <strong>" . ($analysis['sentiment'] ?? 'N/A') . "</strong></p>";
-    echo "<canvas id='sentimentChart" . str_replace(' ', '', $title) . "'></canvas>";
+    displaySentimentAnalysis($analysis);  
     echo "</div>";
     echo "</div>";
     echo "<div class='row mt-3'>";
@@ -125,4 +124,50 @@ function renderSentimentChart($title, $analysis) {
         });";
     }
 }
+function displaySentimentAnalysis($analysis) {
+    if (!isset($analysis['sentiment_analysis']) || !is_array($analysis['sentiment_analysis'])) {
+        echo "<p>Analyse des sentiments non disponible.</p>";
+        return;
+    }
+
+    $sentimentAnalysis = $analysis['sentiment_analysis'];
+
+    echo "<h5>Analyse du sentiment</h5>";
+    
+    echo "<p>Sentiment global : <strong>" . 
+         (isset($sentimentAnalysis['overall_sentiment']) ? htmlspecialchars($sentimentAnalysis['overall_sentiment']) : 'Non disponible') . 
+         "</strong></p>";
+    
+    echo "<p>Score moyen : " . 
+         (isset($sentimentAnalysis['average_score']) ? number_format($sentimentAnalysis['average_score'], 2) : 'Non disponible') . 
+         "</p>";
+    
+    echo "<p>Émotion dominante : " . 
+         (isset($sentimentAnalysis['dominant_emotion']) ? htmlspecialchars($sentimentAnalysis['dominant_emotion']) : 'Non disponible') . 
+         "</p>";
+
+    if (isset($sentimentAnalysis['sentiment_graph'])) {
+        echo "<img src='data:image/png;base64," . $sentimentAnalysis['sentiment_graph'] . "' alt='Graphique des sentiments' class='img-fluid'>";
+    } else {
+        echo "<p>Graphique des sentiments non disponible.</p>";
+    }
+
+    echo "<h6>Analyse par phrase :</h6>";
+    if (isset($sentimentAnalysis['sentence_sentiments']) && is_array($sentimentAnalysis['sentence_sentiments'])) {
+        echo "<ul>";
+        foreach ($sentimentAnalysis['sentence_sentiments'] as $sent) {
+            echo "<li>" . 
+                 (isset($sent['text']) ? htmlspecialchars($sent['text']) : 'Texte non disponible') . 
+                 " - " . 
+                 (isset($sent['sentiment']) ? htmlspecialchars($sent['sentiment']) : 'Sentiment non disponible') . 
+                 " (" . 
+                 (isset($sent['score']) ? number_format($sent['score'], 2) : 'Score non disponible') . 
+                 ")</li>";
+        }
+        echo "</ul>";
+    } else {
+        echo "<p>Analyse par phrase non disponible.</p>";
+    }
+}
+
 ?>

@@ -3,7 +3,8 @@ venv/
 .env/
 
 # Ignore les fichiers de logs
-*.log
+*.log*
+nlp_analysis.log*
 
 # Ignore les fichiers de cache Python
 __pycache__/

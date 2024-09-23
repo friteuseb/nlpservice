@@ -48,12 +48,29 @@ $similarities = Analyzer::calculateAllSimilarities();
         </div>
     </div>
 
-<script>
+    <script>
 <?php
     foreach ($analyses as $title => $analysis) {
         renderSentimentChart($title, $analysis);
     }
-    ?>
+?>
+
+function displaySentimentAnalysis(sentimentAnalysis, container) {
+    container.innerHTML = `
+        <h4>Analyse des sentiments</h4>
+        <p>Sentiment global : <strong>${sentimentAnalysis.overall_sentiment}</strong></p>
+        <p>Score moyen : ${sentimentAnalysis.average_score.toFixed(2)}</p>
+        <p>Émotion dominante : ${sentimentAnalysis.dominant_emotion}</p>
+        <img src="data:image/png;base64,${sentimentAnalysis.sentiment_graph}" alt="Graphique des sentiments" class="img-fluid">
+        <h5>Analyse par phrase :</h5>
+        <ul>
+            ${sentimentAnalysis.sentence_sentiments.map(sent => 
+                `<li>${sent.text} - ${sent.sentiment} (${sent.score.toFixed(2)})</li>`
+            ).join('')}
+        </ul>
+    `;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('liveTestForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -63,7 +80,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         console.log('Texte à analyser:', text);
 
-        fetch('https://nlpservice.semantic-suggestion.com/api/analyze', {
+/*        fetch('https://nlpservice.semantic-suggestion.com/api/analyze', {*/
+        fetch('https://cors-anywhere.herokuapp.com/https://nlpservice.semantic-suggestion.com/api/analyze', {
+
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -84,6 +103,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 throw new Error(data.error);
             }
             resultDiv.innerHTML = '<h3>Résultat de l\'analyse</h3>';
+            
+            // Affichage de l'analyse des sentiments
+            if (data.sentiment_analysis) {
+                displaySentimentAnalysis(data.sentiment_analysis, resultDiv);
+            }
+            
+            // Affichage des autres résultats
+            resultDiv.innerHTML += '<h4>Autres résultats</h4>';
             resultDiv.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
         })
         .catch((error) => {

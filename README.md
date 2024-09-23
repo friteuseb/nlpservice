@@ -253,6 +253,11 @@ Expérimentez avec différentes méthodes et paramètres pour trouver la meilleu
 ```
 
 
+ curl -X POST https://nlpservice.semantic-suggestion.com/api/analyze \
+     -H "Content-Type: application/json" \
+     -d '{
+         "content": "RWxsZSBzb25nZWFpdCBxdWVscXVlZm9pcyBxdWUgY+KAmcOpdGFpZW50IGzDoCBwb3VydGFudCBsZXMgcGx1cyBiZWF1eCBqb3VycyBkZSBzYSB2aWUsIGxhIGx1bmUgZGUgbWllbCwgY29tbWUgb24gZGlzYWl0LiBQb3VyIGVuIGdvw7t0ZXIgbGEgZG91Y2V1ciwgaWwgZcO7dCBmYWxsdSwgc2FucyBkb3V0ZSwgc+KAmWVuIGFsbGVyIHZlcnMgZGVzIHBheXMgw6Agbm9tcyBzb25vcmVzIG/DuSBsZXMgbGVuZGVtYWlucyBkZSBtYXJpYWdlIG9udCBkZSBwbHVzIHN1YXZlcyBwYXJlc3NlcyAhIERhbnMgZGVzIGNoYWlzZXMgZGUgcG9zdGUsIHNvdXMgZGVzIHN0b3JlcyBkZSBzb2llIGJsZXVlLCBvbiBtb250ZSBhdSBwYXMgZGVzIHJvdXRlcyBlc2NhcnDDqWVzLCDDqWNvdXRhbnQgbGEgY2hhbnNvbiBkdSBwb3N0aWxsb24sIHF1aSBzZSByw6lwy6h0ZSBkYW5zIGxhIG1vbnRhZ25lIGF2ZWMgbGVzIGNsb2NoZXR0ZXMgZGVzIGNow6h2cmVzIGV0IGxlIGJydWl0IHNvdXJkIGRlIGxhIGNhc2NhZGUuIFF1YW5kIGxlIHNvbGVpbCBzZSBjb3VjaGUsIG9uIHJlc3BpcmUgYXUgYm9yZCBkZXMgZ29sZmVzIGxlIHBhcmZ1bSBkZXMgY2l0cm9ubmllcnMgOyBwdWlzLCBsZSBzb2lyLCBzdXIgbGEgdGVycmFzc2UgZGVzIHZpbGxhcywgc2V1bHMgZXQgbGVzIGRvaWd0cyBjb25mb25kdXMsIG9uIHJlZ2FyZGUgbGVzIMOpdG9pbGVzIGVuIGZhaXNhbnQgZGVzIHByb2pldHMuIElsIGx1aSBzZW1ibGFpdCBxdWUgY2VydGFpbnMgbGlldXggc3VyIGxhIHRlcnJlIGRldmFpZW50IHByb2R1aXJlIGR1IGJvbmhldXIsIGNvbW1lIHVuZSBwbGFudGUgcGFydGljdWxpw6hyZSBhdSBzb2wgZXQgcXVpIHBvdXNzZSBtYWwgdG91dCBhdXRyZSBwYXJ0LiBRdWUgbmUgcG91dmFpdC1lbGxlIHPigJlhY2NvdWRlciBzdXIgbGUgYmFsY29uIGRlcyBjaGFsZXRzIHN1aXNzZXMgb3UgZW5mZXJtZXIgc2EgdHJpc3Rlc3NlIGRhbnMgdW4gY290dGFnZSDDqWNvc3NhaXMsIGF2ZWMgdW4gbWFyaSB2w6p0dSBk4oCZdW4gaGFiaXQgZGUgdmVsb3VycyBub2lyIMOgIGxvbmd1ZXMgYmFzcXVlcywgZXQgcXVpIHBvcnRlIGRlcyBib3R0ZXMgbW9sbGVzLCB1biBjaGFwZWF1IHBvaW50dSBldCBkZXMgbWFuY2hldHRlcyAhCgpQZXV0LcOqdHJlIGF1cmFpdC1lbGxlIHNvdWhhaXTDqSBmYWlyZSDDoCBxdWVscXUndW4gbGEgY29uZmlkZW5jZSBkZSB0b3V0ZXMgY2VzIGNob3Nlcy4gTWFpcyBjb21tZW50IGRpcmUgdW4gaW5zYWlzaXNzYWJsZSBtYWxhaXNlLCBxdWkgY2hhbmdlIGQnYXNwZWN0IGNvbW1lIGxlcyBudcOpZXMsIHF1aSB0b3VyYmlsbG9ubmUgY29tbWUgbGUgdmVudCA/IExlcyBtb3RzIGx1aSBtYW5xdWFpZW50IGRvbmMsIGwnb2NjYXNpb24sIGxhIGhhcmRpZXNzZS4KU2kgQ2hhcmxlcyBs4oCZYXZhaXQgdm91bHUgY2VwZW5kYW50LCBzJ2lsIHMnZW4gZsO7dCBkb3V0w6ksIHNpIHNvbiByZWdhcmQsIHVuZSBzZXVsZSBmb2lzLCBmw7t0IHZlbnUgw6AgbGEgcmVuY29udHJlIGRlIHNhIHBlbnPDqWUsIGlsIGx1aSBzZW1ibGFpdCBxdSd1bmUgYWJvbmRhbmNlIHN1Yml0ZSBzZSBzZXJhaXQgZMOpdGFjaMOpZSBkZSBzb24gY8OcdXIsIGNvbW1lIHRvbWJlIGxhIHLDqWNvbHRlIGQndW4gZXNwYWxpZXIgcXVhbmQgb24geSBwb3J0ZSBsYSBtYWluLiBNYWlzLCDDoCBtZXN1cmUgcXVlIHNlIHNlcnJhaXQgZGF2YW50YWdlIGwnaW50aW1pdMOpIGRlIGxldXIgdmllLCB1biBkw6l0YWNoZW1lbnQgaW50w6lyaWV1ciBzZSBmYWlzYWl0IHF1aSBsYSBkw6lsaWFpdCBkZSBsdWkuCkxhIGNvbnZlcnNhdGlvbiBkZSBDaGFybGVzIMOpdGFpdCBwbGF0ZSBjb21tZSB1biB0cm90dG9pciBkZSBydWUsIGV0IGxlcyBpZMOpZXMgZGUgdG91dCBsZSBtb25kZSB5IGTDqWZpbGFpZW50IGRhbnMgbGV1ciBjb3N0dW1lIG9yZGluYWlyZSwgc2FucyBleGNpdGVyIGQnw6ltb3Rpb24sIGRlIHJpcmUgb3UgZGUgcsOqdmVyaWUuIElsIG4nYXZhaXQgamFtYWlzIMOpdMOpIGN1cmlldXgsIGRpc2FpdC1pbCwgcGVuZGFudCBxdSdpbCBoYWJpdGFpdCBSb3VlbiwgZCdhbGxlciB2b2lyIGF1IHRow6nDonRyZSBsZXMgYWN0ZXVycyBkZSBQYXJpcy4gSWwgbmUgc2F2YWl0IG5pIG5hZ2VyLCBuaSBmYWlyZSBkZXMgYXJtZXMsIG5pIHRpcmVyIGxlIHBpc3RvbGV0LCBldCBpbCBuZSBwdXQsIHVuIGpvdXIsIGx1aSBleHBsaXF1ZXIgdW4gdGVybWUgZCfDqXF1aXRhdGlvbiBxdSdlbGxlIGF2YWl0IHJlbmNvbnRyw6kgZGFucyB1biByb21hbi4="
+     }'
 
 
 ### Format de réponse
@@ -276,6 +281,108 @@ La réponse sera un objet JSON contenant les résultats de l'analyse, par exempl
 }
 ```
 
+# Commandes utiles pour le Raspberry Pi 5
+
+## Environnement virtuel Python
+
+### Activer l'environnement virtuel
+```bash
+source /home/dietpi/nlpservice/venv/bin/activate
+```
+
+### Désactiver l'environnement virtuel
+```bash
+deactivate
+```
+
+## Services
+
+### Redémarrer le service NLP
+```bash
+sudo systemctl restart nlpservice
+```
+
+### Vérifier le statut du service NLP
+```bash
+sudo systemctl status nlpservice
+```
+
+### Redémarrer Nginx
+```bash
+sudo systemctl restart nginx
+```
+
+### Vérifier le statut de Nginx
+```bash
+sudo systemctl status nginx
+```
+
+## Configuration
+
+### Éditer la configuration Nginx
+```bash
+sudo nano /etc/nginx/sites-available/nlpservice
+```
+
+### Éditer la configuration du service NLP
+```bash
+sudo nano /etc/systemd/system/nlpservice.service
+```
+
+### Recharger les configurations systemd après modification
+```bash
+sudo systemctl daemon-reload
+```
+
+## Logs
+
+### Voir les logs du service NLP
+```bash
+sudo journalctl -u nlpservice -f
+```
+
+### Voir les logs d'erreur Nginx
+```bash
+sudo tail -f /var/log/nginx/error.log
+```
+
+### Voir les logs d'accès Nginx
+```bash
+sudo tail -f /var/log/nginx/access.log
+```
+
+## Gestion des fichiers
+
+### Naviguer vers le répertoire du projet
+```bash
+cd /home/dietpi/nlpservice
+```
+
+### Éditer un fichier Python du projet
+```bash
+nano app/main.py
+```
+
+## Mise à jour du système
+
+### Mettre à jour les paquets
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+## Redémarrage du Raspberry Pi
+
+### Redémarrer le Raspberry Pi
+```bash
+sudo reboot
+```
+
+## Arrêt du Raspberry Pi
+
+### Éteindre le Raspberry Pi
+```bash
+sudo shutdown -h now
+```
 ## Maintenance
 
 - Gardez votre système et les dépendances à jour.
