@@ -23,29 +23,45 @@ class NLPAnalyzer:
         self.logger = logging.getLogger(__name__)
 
     def load_resources(self):
+        self.SPACY_AVAILABLE = False
+        self.TRANSFORMERS_AVAILABLE = False
+        self.nlp = None
+        
         try:
             nltk.download('punkt', quiet=True)
             nltk.download('stopwords', quiet=True)
-            self.nlp = spacy.load("fr_core_news_md")  # ou "fr_core_news_sm" ou lg
-            self.sentiment_analyzer = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
-            self.emotion_analyzer = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
             self.stop_words = set(stopwords.words('french'))
-            self.SPACY_AVAILABLE = True
-            self.logger.info("All resources loaded successfully")
+            
+            try:
+                self.nlp = spacy.load("fr_core_news_md")  # ou "fr_core_news_sm" ou lg
+                self.SPACY_AVAILABLE = True
+                self.logger.info("spaCy model loaded successfully")
+            except Exception as e:
+                self.logger.warning(f"Failed to load spaCy model: {str(e)}")
+            
+            try:
+                self.sentiment_analyzer = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
+                self.emotion_analyzer = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
+                self.TRANSFORMERS_AVAILABLE = True
+                self.logger.info("Transformer models loaded successfully")
+            except Exception as e:
+                self.logger.warning(f"Failed to load transformer models: {str(e)}")
+            
+            if self.SPACY_AVAILABLE and self.TRANSFORMERS_AVAILABLE:
+                self.logger.info("All resources loaded successfully")
+            else:
+                self.logger.warning("Some resources failed to load. Functionality may be limited.")
+        
         except Exception as e:
-            self.logger.error(f"Error loading resources: {str(e)}")
-            self.SPACY_AVAILABLE = False
-            self.TRANSFORMERS_AVAILABLE = False
-            self.nlp = None  # Ajouter cette ligne pour éviter d'utiliser `self.nlp` s'il n'est pas chargé
+            self.logger.error(f"Critical error loading resources: {str(e)}")
 
 
-
-    def analyze_text(self, text):
-        self.logger.debug(f"Starting analysis of text: {text[:50]}...")
+    def analyze_text(self, text, generate_sentiment_graph=False):
+        self.logger.debug(f"Starting analysis of text: {text[:50]}... Generate graph: {generate_sentiment_graph}")
         
         try:
             result = {
-                "sentiment_analysis": self.analyze_sentiment(text),  # Nouvelle méthode détaillée
+                "sentiment_analysis": self.analyze_sentiment(text, generate_graph=generate_sentiment_graph),
                 "keyphrases": self.extract_keyphrases(text),
                 "category": self.categorize_text(text),
                 "named_entities": self.extract_named_entities(text),
@@ -71,39 +87,47 @@ class NLPAnalyzer:
             self.logger.error("spaCy model is not available. Cannot perform sentiment analysis.")
             return {"error": "spaCy model not available"}
         
-        sentences = self.nlp(text).sents
-        sentiments = [self.sentiment_analyzer(str(sent))[0] for sent in sentences]
+        if not hasattr(self, 'sentiment_analyzer') or not hasattr(self, 'emotion_analyzer'):
+            self.logger.error("Sentiment or emotion analyzers are not available.")
+            return {"error": "Sentiment or emotion analyzers not available"}
         
-        overall_sentiment = self.sentiment_analyzer(text[:512])[0]
-        emotions = self.emotion_analyzer(text[:512])[0]
-        
-        avg_score = sum(float(s['score']) for s in sentiments) / len(sentiments)
-        
-        sentiment_graph_base64 = None
-        if generate_graph:
-            plt.figure(figsize=(10, 5))
-            plt.plot([s['label'] for s in sentiments], [float(s['score']) for s in sentiments], marker='o')
-            plt.title("Évolution du sentiment à travers le texte")
-            plt.xlabel("Phrases")
-            plt.ylabel("Score de sentiment")
-            plt.xticks(rotation=45)
+        try:
+            sentences = list(self.nlp(text).sents)
+            sentiments = [self.sentiment_analyzer(str(sent))[0] for sent in sentences]
+            
+            overall_sentiment = self.sentiment_analyzer(text[:512])[0]
+            emotions = self.emotion_analyzer(text[:512])[0]
+            
+            avg_score = sum(float(s['score']) for s in sentiments) / len(sentiments) if sentiments else 0
+            
+            sentiment_graph_base64 = None
+            if generate_graph:
+                plt.figure(figsize=(10, 5))
+                plt.plot([s['label'] for s in sentiments], [float(s['score']) for s in sentiments], marker='o')
+                plt.title("Évolution du sentiment à travers le texte")
+                plt.xlabel("Phrases")
+                plt.ylabel("Score de sentiment")
+                plt.xticks(rotation=45)
 
-            buf = io.BytesIO()
-            plt.savefig(buf, format='png')
-            buf.seek(0)
-            sentiment_graph_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
-            plt.close()
-        
-        return {
-            "overall_sentiment": overall_sentiment['label'],
-            "overall_score": float(overall_sentiment['score']),
-            "average_score": avg_score,
-            "sentence_sentiments": [{"text": str(sent), "sentiment": sent_analysis['label'], "score": float(sent_analysis['score'])} 
-                                    for sent, sent_analysis in zip(sentences, sentiments)],
-            "dominant_emotion": emotions['label'],
-            "emotion_score": float(emotions['score']),
-            "sentiment_graph": sentiment_graph_base64  # Optionnel, généré uniquement si demandé
-        }
+                buf = io.BytesIO()
+                plt.savefig(buf, format='png')
+                buf.seek(0)
+                sentiment_graph_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+                plt.close()
+            
+            return {
+                "overall_sentiment": overall_sentiment['label'],
+                "overall_score": float(overall_sentiment['score']),
+                "average_score": avg_score,
+                "sentence_sentiments": [{"text": str(sent), "sentiment": sent_analysis['label'], "score": float(sent_analysis['score'])} 
+                                        for sent, sent_analysis in zip(sentences, sentiments)],
+                "dominant_emotion": emotions['label'],
+                "emotion_score": float(emotions['score']),
+                "sentiment_graph": sentiment_graph_base64
+            }
+        except Exception as e:
+            self.logger.error(f"Error in sentiment analysis: {str(e)}")
+            return {"error": f"Sentiment analysis failed: {str(e)}"}
 
 
     def extract_keyphrases(self, text):

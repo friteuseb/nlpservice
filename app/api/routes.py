@@ -20,8 +20,10 @@ def analyze():
 
     try:
         text = base64.b64decode(data['content']).decode('utf-8')
-        current_app.logger.debug(f"Decoded text: {text[:50]}...")
-        result = nlp_analyzer.analyze_text(text)
+        generate_graph = data.get('generate_sentiment_graph', False)
+        current_app.logger.debug(f"Decoded text: {text[:50]}... Generate graph: {generate_graph}")
+        
+        result = nlp_analyzer.analyze_text(text, generate_sentiment_graph=generate_graph)
         current_app.logger.debug(f"Analysis result: {result}")
         return jsonify(result)
     except Exception as e:
