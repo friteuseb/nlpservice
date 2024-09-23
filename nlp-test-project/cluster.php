@@ -6,7 +6,7 @@ function analyzeTexts($texts) {
     foreach ($texts as $index => $text) {
         $data = array(
             'content' => base64_encode($text),
-            'generate_sentiment_graph' => true
+            'generate_sentiment_graph' => false
         );
         
         $options = array(
@@ -30,10 +30,10 @@ function analyzeTexts($texts) {
     return $results;
 }
 
-function extractTopics($texts, $numTopics = 5) {
+function extractTopics($texts, $numTopics = 3) {
     $url = 'https://nlpservice.semantic-suggestion.com/api/extract_topics';
     $data = array(
-        'texts' => array_map('base64_encode', $texts),
+        'texts' => $texts,
         'num_topics' => $numTopics
     );
     
@@ -56,11 +56,8 @@ function extractTopics($texts, $numTopics = 5) {
 }
 
 $texts = [
-    "Quelle pitié que Bilbon ne l'ait pas tué quand il en a eu l'occasion !
-    Gandalf : De la pitié ? Mais c'est la pitié qui a retenu la main de votre oncle. Nombreux sont les vivants qui mériteraient la mort et les morts qui mériteraient la vie. Pouvez vous leur rendre ? Frodon ? Alors ne soyez pas trop prompt à dispenser mort et jugement. Même les grands sages ne peuvent connaître toutes les fins. Mon cœur me dit que Gollum a encore un rôle à jouer. En bien ou en mal, avant que cette histoire se termine. De la pitié de Bilbon peu dépendre le sort de beaucoup.",
-    
+    "Quelle pitié que Bilbon ne l'ait pas tué quand il en a eu l'occasion ! Gandalf : De la pitié ? Mais c'est la pitié qui a retenu la main de votre oncle. Nombreux sont les vivants qui mériteraient la mort et les morts qui mériteraient la vie. Pouvez vous leur rendre ? Frodon ? Alors ne soyez pas trop prompt à dispenser mort et jugement. Même les grands sages ne peuvent connaître toutes les fins. Mon cœur me dit que Gollum a encore un rôle à jouer. En bien ou en mal, avant que cette histoire se termine. De la pitié de Bilbon peu dépendre le sort de beaucoup.",
     "Frodon était à présent en sûreté dans la Dernière Maison Simple à l'Est de la Mer. C'était, comme Bilbon l'avait déclaré jadis, \"une maison parfaite, que l'on aime manger, dormir, raconter des histoires ou chanter, ou encore un agréable mélange de tout cela\". Le seul fait de se trouver là était un remède à la fatigue, à la peur ou à la tristesse.",
-    
     "Il se jeta sur son lit et sombra aussitôt dans un long sommeil. Les autres ne tardèrent pas à faire de même, et aucun bruit ni rêve ne vint troubler leur repos. A leur réveil, ils virent que la lumière du jour se répandait à flots sur la pelouse devant la tente, et que la source jaillissait et tombait scintillante au soleil."
 ];
 
@@ -91,11 +88,6 @@ $topics = extractTopics($texts);
             <p>Sentiment global: <?php echo $result['sentiment_analysis']['overall_sentiment']; ?></p>
             <p>Score: <?php echo $result['sentiment_analysis']['overall_score']; ?></p>
             
-            <?php if (isset($result['sentiment_analysis']['sentiment_graph'])): ?>
-                <h4>Graphique de Sentiment</h4>
-                <img src="data:image/png;base64,<?php echo $result['sentiment_analysis']['sentiment_graph']; ?>" alt="Graphique de sentiment">
-            <?php endif; ?>
-            
             <h3>Mots-clés</h3>
             <ul>
                 <?php foreach ($result['keyphrases'] as $keyphrase): ?>
@@ -105,38 +97,73 @@ $topics = extractTopics($texts);
         <?php endif; ?>
     <?php endforeach; ?>
 
-    <h2>Thématiques Dominantes</h2>
+    <h2>Thèmes Extraits</h2>
     <?php if (isset($topics['error'])): ?>
         <p>Erreur: <?php echo $topics['error']; ?></p>
     <?php else: ?>
         <ul>
-            <?php foreach ($topics as $topic): ?>
-                <li>Thème <?php echo $topic['id'] + 1; ?>: <?php echo implode(', ', $topic['words']); ?></li>
+            <?php foreach ($topics as $index => $topic): ?>
+                <li>Thème <?php echo $index + 1; ?>: <?php echo implode(', ', $topic['words']); ?></li>
             <?php endforeach; ?>
         </ul>
+    <?php endif; ?>
 
-        <canvas id="topicsChart"></canvas>
-        <script>
-        var ctx = document.getElementById('topicsChart').getContext('2d');
-        var chart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: <?php echo json_encode(array_map(function($topic) { return "Thème " . ($topic['id'] + 1); }, $topics)); ?>,
-                datasets: [{
-                    label: 'Importance des thèmes',
-                    data: <?php echo json_encode(array_map(function($topic) { return count($topic['words']); }, $topics)); ?>,
-                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
-                }]
+    <h2>Analyse Thématique et de Sentiment</h2>
+    <canvas id="themesSentimentChart"></canvas>
+
+    <script>
+    var ctx = document.getElementById('themesSentimentChart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [
+                <?php foreach ($analysisResults as $index => $result): ?>
+                {
+                    label: 'Texte <?php echo $index + 1; ?>',
+                    data: [{
+                        x: <?php echo $result['sentiment_analysis']['overall_score']; ?>,
+                        y: <?php 
+                            $themeScore = 0;
+                            foreach ($topics as $topic) {
+                                $themeScore += count(array_intersect($result['keyphrases'], $topic['words'])) / count($topic['words']);
+                            }
+                            echo $themeScore / count($topics);
+                        ?>
+                    }],
+                    backgroundColor: 'rgba(<?php echo rand(0, 255); ?>, <?php echo rand(0, 255); ?>, <?php echo rand(0, 255); ?>, 0.8)'
+                },
+                <?php endforeach; ?>
+            ]
+        },
+        options: {
+            scales: {
+                x: {
+                    type: 'linear',
+                    position: 'bottom',
+                    title: {
+                        display: true,
+                        text: 'Score de Sentiment'
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    title: {
+                        display: true,
+                        text: 'Proximité Thématique'
+                    }
+                }
             },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.dataset.label + ': (Sentiment: ' + context.parsed.x.toFixed(2) + ', Proximité Thématique: ' + context.parsed.y.toFixed(2) + ')';
+                        }
                     }
                 }
             }
-        });
-        </script>
-    <?php endif; ?>
+        }
+    });
+    </script>
 </body>
 </html>
