@@ -16,9 +16,7 @@ import numpy as np
 class NLPAnalyzer:
     def __init__(self):
         self.setup_logging()
-        self.load_resources()
-        self.sentiment_analyzer = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
-        self.emotion_analyzer = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
+        self.load_resources()  # Charger toutes les ressources une seule fois
 
     def setup_logging(self):
         logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -30,6 +28,7 @@ class NLPAnalyzer:
             nltk.download('stopwords', quiet=True)
             self.nlp = spacy.load("fr_core_news_lg")
             self.sentiment_analyzer = pipeline("sentiment-analysis", model="nlptown/bert-base-multilingual-uncased-sentiment")
+            self.emotion_analyzer = pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
             self.stop_words = set(stopwords.words('french'))
             self.SPACY_AVAILABLE = True
             self.TRANSFORMERS_AVAILABLE = True
@@ -38,6 +37,7 @@ class NLPAnalyzer:
             self.logger.error(f"Error loading resources: {str(e)}")
             self.SPACY_AVAILABLE = False
             self.TRANSFORMERS_AVAILABLE = False
+
 
     def analyze_text(self, text):
         self.logger.debug(f"Starting analysis of text: {text[:50]}...")
@@ -65,30 +65,29 @@ class NLPAnalyzer:
             self.logger.error(f"Error during text analysis: {str(e)}")
             raise
 
-    def analyze_sentiment(self, text):
+    def analyze_sentiment(self, text, generate_graph=False):
         sentences = self.nlp(text).sents
         sentiments = [self.sentiment_analyzer(str(sent))[0] for sent in sentences]
         
         overall_sentiment = self.sentiment_analyzer(text[:512])[0]
         emotions = self.emotion_analyzer(text[:512])[0]
         
-        # Calculer les scores moyens
         avg_score = sum(float(s['score']) for s in sentiments) / len(sentiments)
         
-        # Créer un graphique
-        plt.figure(figsize=(10, 5))
-        plt.plot([s['label'] for s in sentiments], [float(s['score']) for s in sentiments], marker='o')
-        plt.title("Évolution du sentiment à travers le texte")
-        plt.xlabel("Phrases")
-        plt.ylabel("Score de sentiment")
-        plt.xticks(rotation=45)
-        
-        # Convertir le graphique en image base64
-        buf = io.BytesIO()
-        plt.savefig(buf, format='png')
-        buf.seek(0)
-        img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
-        plt.close()
+        sentiment_graph_base64 = None
+        if generate_graph:
+            plt.figure(figsize=(10, 5))
+            plt.plot([s['label'] for s in sentiments], [float(s['score']) for s in sentiments], marker='o')
+            plt.title("Évolution du sentiment à travers le texte")
+            plt.xlabel("Phrases")
+            plt.ylabel("Score de sentiment")
+            plt.xticks(rotation=45)
+
+            buf = io.BytesIO()
+            plt.savefig(buf, format='png')
+            buf.seek(0)
+            sentiment_graph_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+            plt.close()
         
         return {
             "overall_sentiment": overall_sentiment['label'],
@@ -98,8 +97,9 @@ class NLPAnalyzer:
                                     for sent, sent_analysis in zip(sentences, sentiments)],
             "dominant_emotion": emotions['label'],
             "emotion_score": float(emotions['score']),
-            "sentiment_graph": img_base64
+            "sentiment_graph": sentiment_graph_base64  # Optionnel, généré uniquement si demandé
         }
+
 
     def extract_keyphrases(self, text):
         words = word_tokenize(text.lower(), language='french')
