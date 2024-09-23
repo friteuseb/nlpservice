@@ -288,6 +288,7 @@ La réponse sera un objet JSON contenant les résultats de l'analyse, par exempl
 ### Activer l'environnement virtuel
 ```bash
 source /home/dietpi/nlpservice/venv/bin/activate
+source  venv/bin/activate
 ```
 
 ### Désactiver l'environnement virtuel

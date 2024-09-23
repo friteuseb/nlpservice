@@ -9,11 +9,12 @@ from transformers import pipeline
 import matplotlib.pyplot as plt
 import io
 import base64
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.cluster import KMeans
+from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
+from sklearn.cluster import KMeans
 import numpy as np
+
 
 class NLPAnalyzer:
     def __init__(self):
@@ -238,31 +239,44 @@ class NLPAnalyzer:
                 raise
 
     def extract_topics(self, texts, method='lda', num_topics=5):
-        vectorizer = TfidfVectorizer(max_features=1000, stop_words=self.stop_words)
-        X = vectorizer.fit_transform(texts)
-        feature_names = vectorizer.get_feature_names()
-        
-        if method == 'lda':
-            model = LatentDirichletAllocation(n_components=num_topics, random_state=42)
-        elif method == 'kmeans':
-            model = KMeans(n_clusters=num_topics, random_state=42)
-        else:
-            raise ValueError("Method must be 'lda' or 'kmeans'")
-        
-        model.fit(X)
-        
-        topics = []
-        if method == 'lda':
-            for topic_idx, topic in enumerate(model.components_):
-                top_words = [feature_names[i] for i in topic.argsort()[:-10 - 1:-1]]
-                topics.append({"id": topic_idx, "words": top_words})
-        else:  # kmeans
-            order_centroids = model.cluster_centers_.argsort()[:, ::-1]
-            for i in range(num_topics):
-                top_words = [feature_names[ind] for ind in order_centroids[i, :10]]
-                topics.append({"id": i, "words": top_words})
-        
-        return topics
+        try:
+            # Convertir self.stop_words en liste si c'est un ensemble
+            stop_words = list(self.stop_words) if isinstance(self.stop_words, set) else self.stop_words
+
+            vectorizer = TfidfVectorizer(max_features=1000, stop_words=stop_words)
+            X = vectorizer.fit_transform(texts)
+            
+            # Utiliser get_feature_names_out() au lieu de get_feature_names()
+            try:
+                feature_names = vectorizer.get_feature_names_out()
+            except AttributeError:
+                # Fallback pour les anciennes versions de scikit-learn
+                feature_names = vectorizer.get_feature_names()
+            
+            if method == 'lda':
+                model = LatentDirichletAllocation(n_components=num_topics, random_state=42)
+            elif method == 'kmeans':
+                model = KMeans(n_clusters=num_topics, random_state=42)
+            else:
+                raise ValueError("Method must be 'lda' or 'kmeans'")
+            
+            model.fit(X)
+            
+            topics = []
+            if method == 'lda':
+                for topic_idx, topic in enumerate(model.components_):
+                    top_words = [feature_names[i] for i in topic.argsort()[:-10 - 1:-1]]
+                    topics.append({"id": topic_idx, "words": top_words})
+            else:  # kmeans
+                order_centroids = model.cluster_centers_.argsort()[:, ::-1]
+                for i in range(num_topics):
+                    top_words = [feature_names[ind] for ind in order_centroids[i, :10]]
+                    topics.append({"id": i, "words": top_words})
+            
+            return topics
+        except Exception as e:
+            self.logger.error(f"Error in extract_topics: {str(e)}")
+            raise
 
     def _lda_topics(self, texts, num_topics):
         vectorizer = TfidfVectorizer(max_features=1000, stop_words=self.stop_words)

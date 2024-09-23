@@ -56,6 +56,23 @@ def calculate_similarity():
         current_app.logger.error(f"Error during similarity calculation: {str(e)}")
         return jsonify({"error": f"Error during similarity calculation: {str(e)}"}), 500
 
+@api_bp.route('/extract_topics', methods=['POST'])
+def extract_topics():
+    try:
+        data = request.json
+        if not data or 'texts' not in data:
+            return jsonify({"error": "No texts provided for topic extraction"}), 400
+        
+        texts = data['texts']
+        num_topics = data.get('num_topics', 3)  # default to 3 if not provided
+        
+        topics = nlp_analyzer.extract_topics(texts, num_topics=num_topics)
+        return jsonify(topics)
+    except Exception as e:
+        current_app.logger.error(f"Error in topic extraction: {str(e)}")
+        return jsonify({"error": f"Topic extraction failed: {str(e)}"}), 500
+
+
 @api_bp.errorhandler(429)
 def ratelimit_handler(e):
     return jsonify({"error": "Rate limit exceeded. Please try again later."}), 429
