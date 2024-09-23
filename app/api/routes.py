@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-from flask import Blueprint, request, jsonify, current_app
-=======
 from flask import Blueprint, request, jsonify
->>>>>>> 161b832178d4b22a52039ba1897d95c71c8ef49f
 from ..nlp.analyzer import NLPAnalyzer
 import base64
 import logging
@@ -12,13 +8,10 @@ from flask_limiter.util import get_remote_address
 api_bp = Blueprint('api', __name__)
 nlp_analyzer = NLPAnalyzer()
 
-<<<<<<< HEAD
-=======
 # Configuration du logging
 logging.basicConfig(filename='api_requests.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
->>>>>>> 161b832178d4b22a52039ba1897d95c71c8ef49f
 # Initialisation du limiteur de requêtes
 limiter = Limiter(key_func=get_remote_address)
 
