@@ -1,7 +1,7 @@
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.corpus import stopwords
-from nltk.util import ngrams
+from nltk import word_tokenize, ngrams
 from collections import Counter
 import logging
 import spacy
@@ -16,7 +16,8 @@ import numpy as np
 class NLPAnalyzer:
     def __init__(self):
         self.setup_logging()
-        self.load_resources()  # Charger toutes les ressources une seule fois
+        self.load_resources()  
+
 
     def setup_logging(self):
         logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -31,7 +32,8 @@ class NLPAnalyzer:
             nltk.download('punkt', quiet=True)
             nltk.download('stopwords', quiet=True)
             self.stop_words = set(stopwords.words('french'))
-            
+            self.logger.info("NLTK resources loaded successfully")           
+
             try:
                 self.nlp = spacy.load("fr_core_news_md")  # ou "fr_core_news_sm" ou lg
                 self.SPACY_AVAILABLE = True
@@ -170,8 +172,16 @@ class NLPAnalyzer:
         return len(set(words)) / len(words) if words else 0
 
     def extract_top_n_grams(self, text, n=2, top=5):
+        # Tokenisation et mise en minuscules
         words = word_tokenize(text.lower(), language='french')
-        n_grams = list(ngrams(words, n))
+        
+        # Filtrage des mots vides et de la ponctuation
+        filtered_words = [word for word in words if word.isalnum() and word not in self.stop_words]
+        
+        # Génération des n-grams
+        n_grams = list(ngrams(filtered_words, n))
+        
+        # Comptage et retour des top n-grams
         return Counter(n_grams).most_common(top)
 
     def calculate_semantic_coherence(self, text):

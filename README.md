@@ -307,6 +307,11 @@ sudo systemctl restart nlpservice
 sudo systemctl status nlpservice
 ```
 
+### Active le service NLP au démarrage
+```bash
+sudo systemctl enable nlpservice
+```
+
 ### Redémarrer Nginx
 ```bash
 sudo systemctl restart nginx
