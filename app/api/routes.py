@@ -1,19 +1,13 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from ..nlp.analyzer import NLPAnalyzer
 import base64
-import logging
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+limiter = Limiter(key_func=get_remote_address)
+
 api_bp = Blueprint('api', __name__)
 nlp_analyzer = NLPAnalyzer()
-
-# Configuration du logging
-logging.basicConfig(filename='api_requests.log', level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-
-# Initialisation du limiteur de requêtes
-limiter = Limiter(key_func=get_remote_address)
 
 @api_bp.route('/analyze', methods=['POST'])
 @limiter.limit("5 per minute")
@@ -27,12 +21,6 @@ def analyze():
     try:
         text = base64.b64decode(data['content']).decode('utf-8')
         current_app.logger.debug(f"Decoded text: {text[:50]}...")
-    except Exception as e:
-        current_app.logger.error(f"Invalid base64 encoding: {str(e)}")
-        return jsonify({"error": f"Invalid base64 encoding: {str(e)}"}), 400
-
-    try:
-        current_app.logger.info(f"Analyzing text: {text[:50]}...")
         result = nlp_analyzer.analyze_text(text)
         current_app.logger.debug(f"Analysis result: {result}")
         return jsonify(result)
@@ -45,23 +33,20 @@ def analyze():
 def calculate_similarity():
     current_app.logger.debug("Received similarity calculation request")
     data = request.json
-    current_app.logger.debug(f"Request data: {data}")
-
     if not data or 'text1' not in data or 'text2' not in data:
         current_app.logger.warning("Both texts are required for similarity calculation")
         return jsonify({"error": "Both texts are required for similarity calculation"}), 400
 
     try:
-        text1 = base64.b64decode(data['text1']).decode('utf-8')
-        text2 = base64.b64decode(data['text2']).decode('utf-8')
+        text1 = base64.b64decode(data['text1']).decode('utf-8', errors='ignore')
+        text2 = base64.b64decode(data['text2']).decode('utf-8', errors='ignore')
         current_app.logger.debug(f"Decoded text1: {text1}")
         current_app.logger.debug(f"Decoded text2: {text2}")
     except Exception as e:
-        current_app.logger.error(f"Invalid base64 encoding: {str(e)}")
-        return jsonify({"error": f"Invalid base64 encoding: {str(e)}"}), 400
+        current_app.logger.error(f"Error decoding base64: {str(e)}")
+        return jsonify({"error": f"Error decoding base64: {str(e)}"}), 400
 
     try:
-        current_app.logger.info("Calculating similarity...")
         result = nlp_analyzer.calculate_similarity(text1, text2)
         current_app.logger.debug(f"Similarity result: {result}")
         return jsonify(result)
@@ -72,3 +57,8 @@ def calculate_similarity():
 @api_bp.errorhandler(429)
 def ratelimit_handler(e):
     return jsonify({"error": "Rate limit exceeded. Please try again later."}), 429
+
+@api_bp.errorhandler(Exception)
+def handle_exception(e):
+    current_app.logger.error(f"Unhandled exception: {str(e)}")
+    return jsonify({"error": "An unexpected error occurred"}), 500

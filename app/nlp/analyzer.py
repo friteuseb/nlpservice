@@ -10,14 +10,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
-
 class NLPAnalyzer:
     def __init__(self):
         self.setup_logging()
         self.load_resources()
 
     def setup_logging(self):
-        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+        logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
         self.logger = logging.getLogger(__name__)
 
     def load_resources(self):
@@ -29,51 +28,59 @@ class NLPAnalyzer:
             self.stop_words = set(stopwords.words('french'))
             self.SPACY_AVAILABLE = True
             self.TRANSFORMERS_AVAILABLE = True
-        except ImportError as e:
-            self.logger.warning(f"Impossible de charger certaines ressources: {str(e)}")
+            self.logger.info("All resources loaded successfully")
+        except Exception as e:
+            self.logger.error(f"Error loading resources: {str(e)}")
             self.SPACY_AVAILABLE = False
             self.TRANSFORMERS_AVAILABLE = False
 
     def analyze_text(self, text):
         self.logger.debug(f"Starting analysis of text: {text[:50]}...")
-        self.logger.info(f"Starting analysis of text: {text[:50]}...")
         
-        result = {
-            "sentiment": self.analyze_sentiment(text),
-            "keyphrases": self.extract_keyphrases(text),
-            "category": self.categorize_text(text),
-            "named_entities": self.extract_named_entities(text),
-            "readability_score": self.calculate_readability_score(text),
-            "word_count": len(word_tokenize(text, language='french')),
-            "sentence_count": len(sent_tokenize(text, language='french')),
-            "language": "fr",
-            "lexical_diversity": self.calculate_lexical_diversity(text),
-            "top_n_grams": self.extract_top_n_grams(text),
-            "semantic_coherence": self.calculate_semantic_coherence(text),
-            "sentiment_distribution": self.analyze_sentiment_distribution(text)
-        }
-        
-        result["average_sentence_length"] = result["word_count"] / result["sentence_count"] if result["sentence_count"] > 0 else 0
-
-        self.logger.info("Analysis completed successfully.")
-        self.logger.debug("Analysis completed")
-        return result
+        try:
+            result = {
+                "sentiment": self.analyze_sentiment(text),
+                "keyphrases": self.extract_keyphrases(text),
+                "category": self.categorize_text(text),
+                "named_entities": self.extract_named_entities(text),
+                "readability_score": self.calculate_readability_score(text),
+                "word_count": len(word_tokenize(text, language='french')),
+                "sentence_count": len(sent_tokenize(text, language='french')),
+                "language": "fr",
+                "lexical_diversity": self.calculate_lexical_diversity(text),
+                "top_n_grams": self.extract_top_n_grams(text),
+                "semantic_coherence": self.calculate_semantic_coherence(text),
+                "sentiment_distribution": self.analyze_sentiment_distribution(text)
+            }
+            
+            result["average_sentence_length"] = result["word_count"] / result["sentence_count"] if result["sentence_count"] > 0 else 0
+            
+            self.logger.info("Analysis completed successfully.")
+            return result
+        except Exception as e:
+            self.logger.error(f"Error during text analysis: {str(e)}")
+            raise
 
     def analyze_sentiment(self, text):
-        if self.TRANSFORMERS_AVAILABLE:
-            result = self.sentiment_analyzer(text[:512])[0]
-            return result['label']
-        else:
-            positive_words = set(['bon', 'excellent', 'super', 'génial', 'heureux'])
-            negative_words = set(['mauvais', 'terrible', 'horrible', 'triste', 'déçu'])
-            words = word_tokenize(text.lower(), language='french')
-            sentiment_score = sum(1 for word in words if word in positive_words) - sum(1 for word in words if word in negative_words)
-            if sentiment_score > 0:
-                return "POSITIVE"
-            elif sentiment_score < 0:
-                return "NEGATIVE"
+        try:
+            if self.TRANSFORMERS_AVAILABLE:
+                result = self.sentiment_analyzer(text[:512])[0]
+                return result['label']
             else:
-                return "NEUTRAL"
+                # Fallback method
+                positive_words = set(['bon', 'excellent', 'super', 'génial', 'heureux'])
+                negative_words = set(['mauvais', 'terrible', 'horrible', 'triste', 'déçu'])
+                words = word_tokenize(text.lower(), language='french')
+                sentiment_score = sum(1 for word in words if word in positive_words) - sum(1 for word in words if word in negative_words)
+                if sentiment_score > 0:
+                    return "POSITIVE"
+                elif sentiment_score < 0:
+                    return "NEGATIVE"
+                else:
+                    return "NEUTRAL"
+        except Exception as e:
+            self.logger.error(f"Error in sentiment analysis: {str(e)}")
+            return "UNKNOWN"
 
     def extract_keyphrases(self, text):
         words = word_tokenize(text.lower(), language='french')
@@ -141,13 +148,13 @@ class NLPAnalyzer:
         }
 
     def calculate_similarity(self, text1, text2):
-        self.logger.debug("Starting similarity calculation")
-        try:
-            vectorizer = TfidfVectorizer()
-            tfidf_matrix = vectorizer.fit_transform([text1, text2])
-            similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
-            self.logger.info(f"Similarity calculated: {similarity}")
-            return {"similarity": similarity}
-        except Exception as e:
-            self.logger.error(f"Error in similarity calculation: {str(e)}")
-            raise
+            self.logger.debug("Starting similarity calculation")
+            try:
+                vectorizer = TfidfVectorizer()
+                tfidf_matrix = vectorizer.fit_transform([text1, text2])
+                similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
+                self.logger.info(f"Similarity calculated: {similarity}")
+                return {"similarity": similarity}
+            except Exception as e:
+                self.logger.error(f"Error in similarity calculation: {str(e)}")
+                raise
