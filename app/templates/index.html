@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLP Service - Plateforme d'Analyse Sémantique</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        code {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 2px 5px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        .endpoint {
+            background-color: #e8f4f8;
+            border-left: 5px solid #3498db;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        .example {
+            background-color: #f0f0f0;
+            border-left: 5px solid #2ecc71;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>NLP Service - Plateforme d'Analyse Sémantique</h1>
+    <p>Bienvenue sur mon API de service NLP. Cette plateforme offre deux fonctionnalités principales : l'analyse de texte et la comparaison de similarité textuelle.</p>
+
+    <h2>1. Analyse de Texte</h2>
+    <div class="endpoint">
+        <h3>Endpoint : <code>POST /api/analyze</code></h3>
+        <p>Cet endpoint effectue une analyse complète du texte fourni.</p>
+    </div>
+
+    <h3>Format de la Requête :</h3>
+    <pre>
+{
+    "content": "Votre texte ici, encodé en base64"
+}
+    </pre>
+
+    <h3>Exemple utilisant cURL :</h3>
+    <div class="example">
+        <pre>
+curl -X POST https://nlpservice.semantic-suggestion.com/api/analyze \
+     -H "Content-Type: application/json" \
+     -d '{
+         "content": "TGEgcGx1aWUgZCdhdXRvbW5lIHRvbWJlIGRvdWNlbWVudCBzdXIgbGEgdmlsbGUsIGFwcG9ydGFudCB1bmUgYW1iaWFuY2UgbcOpbGFuY29saXF1ZSBldCBhcGFpc2FudGUgw6AgbGEgZm9pcy4="
+     }'
+        </pre>
+        <p>Note : Le contenu "La pluie d'automne tombe doucement sur la ville, apportant une ambiance mélancolique et apaisante à la fois." est encodé en base64 dans l'exemple ci-dessus.</p>
+    </div>
+
+    <h3>Format de la Réponse :</h3>
+    <pre>
+{
+    "sentiment_analysis": {
+        "overall_sentiment": "NEUTRAL",
+        "overall_score": 0.65,
+        "sentiment_distribution": {
+            "POSITIVE": 0.3,
+            "NEGATIVE": 0.2,
+            "NEUTRAL": 0.5
+        },
+        "sentence_sentiments": [
+            {
+                "text": "La pluie d'automne tombe doucement sur la ville, apportant une ambiance mélancolique et apaisante à la fois.",
+                "sentiment": "NEUTRAL",
+                "score": 0.65
+            }
+        ],
+        "dominant_emotion": "mélancolie",
+        "emotion_score": 0.7
+    },
+    "keyphrases": ["pluie d'automne", "ambiance mélancolique", "ville"],
+    "category": "Nature et Environnement",
+    "named_entities": [
+        {"text": "automne", "type": "DATE"}
+    ],
+    "readability_score": 78.5,
+    "word_count": 15,
+    "sentence_count": 1,
+    "language": "fr",
+    "lexical_diversity": 0.93,
+    "top_n_grams": [
+        [("pluie", "d'automne"), 1],
+        [("ambiance", "mélancolique"), 1],
+        [("mélancolique", "et"), 1],
+        [("et", "apaisante"), 1]
+    ],
+    "semantic_coherence": 0.85,
+    "average_sentence_length": 15.0
+}
+    </pre>
+
+    <h3>Explication des Résultats :</h3>
+    <ul>
+        <li><strong>sentiment_analysis</strong> : Analyse détaillée du sentiment du texte.</li>
+        <li><strong>keyphrases</strong> : Mots-clés extraits du texte.</li>
+        <li><strong>category</strong> : Catégorie thématique du texte.</li>
+        <li><strong>named_entities</strong> : Entités nommées identifiées dans le texte.</li>
+        <li><strong>readability_score</strong> : Score de lisibilité du texte (0-100).</li>
+        <li><strong>word_count</strong> : Nombre de mots dans le texte.</li>
+        <li><strong>sentence_count</strong> : Nombre de phrases dans le texte.</li>
+        <li><strong>language</strong> : Langue détectée du texte.</li>
+        <li><strong>lexical_diversity</strong> : Diversité lexicale du texte (0-1).</li>
+        <li><strong>top_n_grams</strong> : N-grammes les plus fréquents dans le texte.</li>
+        <li><strong>semantic_coherence</strong> : Cohérence sémantique du texte (0-1).</li>
+        <li><strong>average_sentence_length</strong> : Longueur moyenne des phrases.</li>
+    </ul>
+
+    <h2>2. Comparaison de Similarité Textuelle</h2>
+    <div class="endpoint">
+        <h3>Endpoint : <code>POST /api/similarity</code></h3>
+        <p>Cet endpoint compare la similarité entre deux textes fournis.</p>
+    </div>
+
+    <h3>Format de la Requête :</h3>
+    <pre>
+{
+    "text1": "Votre premier texte ici, encodé en base64",
+    "text2": "Votre second texte ici, encodé en base64",
+    "method": "cosine"
+}
+    </pre>
+
+    <h3>Exemple utilisant cURL :</h3>
+    <div class="example">
+        <pre>
+curl -X POST https://nlpservice.semantic-suggestion.com/api/similarity \
+     -H "Content-Type: application/json" \
+     -d '{
+         "text1": "TGUgc29sZWlsIGJyaWxsZSBkYW5zIGxlIGNpZWwgYmxldS4=",
+         "text2": "TGVzIG51YWdlcyBjYWNoZW50IGxlIHNvbGVpbCBhdWpvdXJkJ2h1aS4=",
+         "method": "cosine"
+     }'
+        </pre>
+        <p>Note : Les contenus "Le soleil brille dans le ciel bleu." et "Les nuages cachent le soleil aujourd'hui." sont encodés en base64 dans l'exemple ci-dessus.</p>
+    </div>
+
+    <h3>Format de la Réponse :</h3>
+    <pre>
+{
+    "similarity": 0.6789,
+    "method": "cosine"
+}
+    </pre>
+
+
+    <h2>Méthodes de Similarité Disponibles :</h2>
+
+    <h3>1. Cosine (par défaut) : Similarité cosinus</h3>
+    <p><strong>Principe de fonctionnement</strong> : La similarité cosinus mesure l'angle entre deux vecteurs dans un espace multi-dimensionnel. Elle est calculée en prenant le produit scalaire des deux vecteurs, divisé par le produit de leurs normes. Cette méthode ne prend pas en compte la longueur des vecteurs mais se concentre sur leur direction.</p>
+    <ul>
+        <li><strong>Avantage</strong> : Très efficace pour comparer des textes où l'importance réside davantage dans la direction (distribution des mots) que dans la longueur des vecteurs. Utilisée souvent dans l'analyse textuelle et la comparaison de documents.</li>
+        <li><strong>Inconvénient</strong> : La similarité cosinus ne considère pas les différences d'échelle. Deux vecteurs très différents en longueur peuvent avoir une similarité élevée si leur direction est similaire.</li>
+    </ul>
+
+    <h3>2. Euclidean : Distance euclidienne</h3>
+    <p><strong>Principe de fonctionnement</strong> : La distance euclidienne mesure la distance directe (« à vol d'oiseau ») entre deux points dans un espace multi-dimensionnel. Elle est calculée en prenant la racine carrée de la somme des carrés des différences entre les composantes des vecteurs.</p>
+    <ul>
+        <li><strong>Avantage</strong> : Simple à comprendre et à visualiser dans des espaces à faible dimension, la distance euclidienne est intuitive et permet de comparer directement les vecteurs.</li>
+        <li><strong>Inconvénient</strong> : Sensible aux différences de magnitude (longueur) des vecteurs. Si un vecteur est beaucoup plus long qu'un autre, cela peut fortement biaiser la mesure de la distance, même si les deux vecteurs sont sémantiquement similaires.</li>
+    </ul>
+
+    <h3>3. Manhattan : Distance de Manhattan</h3>
+    <p><strong>Principe de fonctionnement</strong> : La distance de Manhattan (aussi appelée distance de taxicab ou distance L1) mesure la somme des distances absolues entre les composantes des vecteurs. Plutôt que de mesurer la distance directe comme la distance euclidienne, elle mesure la distance "en suivant les axes" (comme si l'on se déplaçait en ligne droite dans un réseau quadrillé).</p>
+    <ul>
+        <li><strong>Avantage</strong> : Particulièrement utile dans des situations où il est plus logique de se déplacer le long des axes, par exemple dans les villes ou sur des grilles. Elle peut être moins sensible aux grandes différences de valeurs qu'une distance euclidienne.</li>
+        <li><strong>Inconvénient</strong> : Comme la distance euclidienne, elle reste sensible à la magnitude et peut ne pas capturer parfaitement la similitude sémantique dans un contexte textuel.</li>
+    </ul>
+
+    <h3>4. Jaccard : Indice de Jaccard</h3>
+    <p><strong>Principe de fonctionnement</strong> : L'indice de Jaccard mesure la similarité entre deux ensembles en divisant la taille de l'intersection des ensembles par la taille de leur union. Appliqué aux textes, cela peut être utilisé pour mesurer la similarité entre des ensembles de mots ou des caractéristiques présentes dans les documents.</p>
+    <ul>
+        <li><strong>Avantage</strong> : Très efficace pour mesurer la similarité entre des ensembles discrets (comme des mots, des termes ou des concepts). Il est souvent utilisé dans la comparaison de texte ou de documents où l'important est la présence ou l'absence de certains mots plutôt que leur fréquence.</li>
+        <li><strong>Inconvénient</strong> : Il ne tient pas compte de la fréquence des mots. Ainsi, un mot apparaissant plusieurs fois dans un document n'aura pas plus d'importance qu'un mot apparaissant une seule fois.</li>
+    </ul>
+
+    <h3>5. BLEU : Score BLEU</h3>
+    <p><strong>Principe de fonctionnement</strong> : Le score BLEU (Bilingual Evaluation Understudy) est une méthode principalement utilisée pour évaluer la qualité des traductions automatiques en comparant un texte généré automatiquement à un ou plusieurs textes de référence. Il mesure la proportion de n-grams (groupes de mots contigus) partagés entre les deux textes.</p>
+    <ul>
+        <li><strong>Avantage</strong> : Très adapté à la comparaison de phrases ou de documents courts, en particulier dans des contextes où la structure des phrases est importante (comme la traduction). Le BLEU est un standard dans l'évaluation de la qualité des traductions.</li>
+        <li><strong>Inconvénient</strong> : Il peut manquer de sensibilité à la synonymie (des phrases sémantiquement similaires mais formulées différemment peuvent obtenir un score bas). Il favorise également des phrases courtes, parfois au détriment de la fluidité.</li>
+    </ul>
+
+    <ul>
+        <li><b>Cosine</b> est idéale pour des textes avec une importance sur la direction plus que la longueur.</li>
+        <li><b>Euclidean et Manhattan</b> sont utiles pour des comparaisons où la distance géométrique est pertinente, mais attention aux différences de longueur.</li>
+        <li><b>Jaccard</b> est parfait pour comparer des ensembles de mots.</li>
+        <li><b>BLEU</b> est particulièrement adapté aux comparaisons dans le domaine de la traduction ou pour des phrases.</li>
+
+        <p>Selon tes besoins, tu peux choisir la méthode qui correspond le mieux au contexte d'utilisation.</p>
+    </ul>
+
+
+
+    <h2>Exemple de Code Python</h2>
+    <p>Voici un exemple de script Python pour tester l'API :</p>
+    <pre>
+import requests
+import base64
+
+API_URL = "https://nlpservice.semantic-suggestion.com/api"
+
+def encode_text(text):
+    return base64.b64encode(text.encode('utf-8')).decode('utf-8')
+
+def analyze_text(text):
+    encoded_text = encode_text(text)
+    response = requests.post(f"{API_URL}/analyze", json={"content": encoded_text})
+    return response.json()
+
+def compare_texts(text1, text2, method="cosine"):
+    encoded_text1 = encode_text(text1)
+    encoded_text2 = encode_text(text2)
+    response = requests.post(f"{API_URL}/similarity", json={
+        "text1": encoded_text1,
+        "text2": encoded_text2,
+        "method": method
+    })
+    return response.json()
+
+# Test d'analyse de texte
+text_to_analyze = "L'intelligence artificielle transforme rapidement notre monde."
+analysis_result = analyze_text(text_to_analyze)
+print("Résultat de l'analyse :", analysis_result)
+
+# Test de comparaison de textes
+text1 = "Les chats sont des animaux indépendants."
+text2 = "Les chiens sont des animaux fidèles."
+similarity_result = compare_texts(text1, text2)
+print("Résultat de la comparaison :", similarity_result)
+    </pre>
+
+
+    <h2>Exemple de code PHP</h2>
+    <p>Voici un exemple de script PHP pour tester l'API :</p>
+    <pre>
+
+    &lt;?php
+
+    // Configuration de l'API
+    $API_URL = "https://nlpservice.semantic-suggestion.com/api";
+
+    /**
+    * Encode le texte en base64
+    * @param string $text Le texte à encoder
+    * @return string Le texte encodé en base64
+    */
+    function encodeText($text) {
+        return base64_encode($text);
+    }
+
+    /**
+    * Envoie une requête POST à l'API
+    * @param string $endpoint L'endpoint de l'API
+    * @param array $data Les données à envoyer
+    * @return array La réponse de l'API décodée
+    */
+    function sendRequest($endpoint, $data) {
+        global $API_URL;
+        $url = $API_URL . $endpoint;
+
+        $options = [
+            'http' => [
+                'header'  => "Content-type: application/json\r\n",
+                'method'  => 'POST',
+                'content' => json_encode($data)
+            ]
+        ];
+
+        $context  = stream_context_create($options);
+        $result = file_get_contents($url, false, $context);
+
+        if ($result === FALSE) {
+            return ['error' => 'Erreur lors de la requête à l\'API'];
+        }
+
+        return json_decode($result, true);
+    }
+
+    /**
+    * Analyse un texte
+    * @param string $text Le texte à analyser
+    * @return array Le résultat de l'analyse
+    */
+    function analyzeText($text) {
+        $encodedText = encodeText($text);
+        return sendRequest("/analyze", ['content' => $encodedText]);
+    }
+
+    /**
+    * Compare deux textes
+    * @param string $text1 Le premier texte
+    * @param string $text2 Le deuxième texte
+    * @param string $method La méthode de comparaison (optionnel)
+    * @return array Le résultat de la comparaison
+    */
+    function compareTexts($text1, $text2, $method = 'cosine') {
+        $encodedText1 = encodeText($text1);
+        $encodedText2 = encodeText($text2);
+        return sendRequest("/similarity", [
+            'text1' => $encodedText1,
+            'text2' => $encodedText2,
+            'method' => $method
+        ]);
+    }
+
+    // Exemple d'utilisation
+
+    // Test d'analyse de texte
+    $textToAnalyze = "L'intelligence artificielle transforme rapidement notre monde.";
+    $analysisResult = analyzeText($textToAnalyze);
+    echo "Résultat de l'analyse :\n";
+    print_r($analysisResult);
+
+    // Test de comparaison de textes
+    $text1 = "Les chats sont des animaux indépendants.";
+    $text2 = "Les chiens sont des animaux fidèles.";
+    $similarityResult = compareTexts($text1, $text2);
+    echo "\nRésultat de la comparaison :\n";
+    print_r($similarityResult);
+
+    // Test avec différentes méthodes de similarité
+    $methods = ['cosine', 'euclidean', 'manhattan', 'jaccard', 'bleu'];
+    foreach ($methods as $method) {
+        $result = compareTexts($text1, $text2, $method);
+        echo "\nSimilarité avec la méthode $method :\n";
+        print_r($result);
+    }
+    ?&gt;
+    </pre>
+
+    <h2>Limites de Taux</h2>
+    <p>Veuillez noter que notre API a des limites de taux pour assurer une utilisation équitable :</p>
+    <ul>
+        <li>200 requêtes par jour</li>
+        <li>50 requêtes par heure</li>
+        <li>10 requêtes par minute</li>
+    </ul>
+
+    <h2>Contact</h2>
+    <p>Si vous avez des questions ou besoin d'assistance supplémentaire, veuillez me contacter via linkedin. <a href="https://www.linkedin.com/in/cyrilwolfangel/">https://www.linkedin.com/in/cyrilwolfangel/</a> </p>
+</body>
+</html>
