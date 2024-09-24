@@ -1,6 +1,9 @@
 # Ignore les environnements virtuels
 venv/
+nlp_env/
+nlp_env_new/
 .env/
+
 
 # Ignore les fichiers de logs
 *.log*
