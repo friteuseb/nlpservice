@@ -14,16 +14,26 @@ nlp_analyzer = NLPAnalyzer()
 def analyze():
     current_app.logger.debug("Received analyze request")
     data = request.json
-    if not data or 'content' not in data:
-        current_app.logger.warning("No text provided for analysis")
-        return jsonify({"error": "No text provided for analysis"}), 400
+    if not data:
+        current_app.logger.warning("No data provided for analysis")
+        return jsonify({"error": "No data provided for analysis"}), 400
 
     try:
-        text = base64.b64decode(data['content']).decode('utf-8')
-        generate_graph = data.get('generate_sentiment_graph', False)
-        current_app.logger.debug(f"Decoded text: {text[:50]}... Generate graph: {generate_graph}")
-        
-        result = nlp_analyzer.analyze_text(text, generate_sentiment_graph=generate_graph)
+        if 'content' in data:
+            # Analyse d'un seul texte
+            text = base64.b64decode(data['content']).decode('utf-8')
+            generate_graph = data.get('generate_sentiment_graph', False)
+            result = nlp_analyzer.analyze_text(text, generate_sentiment_graph=generate_graph)
+        elif 'text1' in data and 'text2' in data:
+            # Calcul de similarité entre deux textes
+            text1 = base64.b64decode(data['text1']).decode('utf-8')
+            text2 = base64.b64decode(data['text2']).decode('utf-8')
+            method = data.get('method', 'cosine')
+            result = nlp_analyzer.calculate_similarity(text1, text2, method)
+        else:
+            current_app.logger.warning("Invalid input format")
+            return jsonify({"error": "Invalid input format. Provide either 'content' for single text analysis or 'text1' and 'text2' for similarity calculation"}), 400
+
         current_app.logger.debug(f"Analysis result: {result}")
         return jsonify(result)
     except Exception as e:
@@ -39,19 +49,24 @@ def calculate_similarity():
         current_app.logger.warning("Both texts are required for similarity calculation")
         return jsonify({"error": "Both texts are required for similarity calculation"}), 400
 
+    method = data.get('method', 'cosine')  # Default to cosine similarity if not specified
+
     try:
         text1 = base64.b64decode(data['text1']).decode('utf-8', errors='ignore')
         text2 = base64.b64decode(data['text2']).decode('utf-8', errors='ignore')
-        current_app.logger.debug(f"Decoded text1: {text1}")
-        current_app.logger.debug(f"Decoded text2: {text2}")
+        current_app.logger.debug(f"Decoded text1: {text1[:50]}...")
+        current_app.logger.debug(f"Decoded text2: {text2[:50]}...")
     except Exception as e:
         current_app.logger.error(f"Error decoding base64: {str(e)}")
         return jsonify({"error": f"Error decoding base64: {str(e)}"}), 400
 
     try:
-        result = nlp_analyzer.calculate_similarity(text1, text2)
+        result = nlp_analyzer.calculate_similarity(text1, text2, method)
         current_app.logger.debug(f"Similarity result: {result}")
         return jsonify(result)
+    except ValueError as e:
+        current_app.logger.error(f"Invalid similarity method: {str(e)}")
+        return jsonify({"error": f"Invalid similarity method: {str(e)}"}), 400
     except Exception as e:
         current_app.logger.error(f"Error during similarity calculation: {str(e)}")
         return jsonify({"error": f"Error during similarity calculation: {str(e)}"}), 500

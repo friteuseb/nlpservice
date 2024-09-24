@@ -13,6 +13,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.cluster import KMeans
+from .similarity_calculator import SimilarityCalculator
 import numpy as np
 
 
@@ -20,6 +21,7 @@ class NLPAnalyzer:
     def __init__(self):
         self.setup_logging()
         self.load_resources()  
+        self.similarity_calculator = SimilarityCalculator()
 
 
     def setup_logging(self):
@@ -226,17 +228,15 @@ class NLPAnalyzer:
             "NEUTRAL": sentiments.count("NEUTRAL") / len(sentiments)
         }
 
-    def calculate_similarity(self, text1, text2):
-            self.logger.debug("Starting similarity calculation")
-            try:
-                vectorizer = TfidfVectorizer()
-                tfidf_matrix = vectorizer.fit_transform([text1, text2])
-                similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
-                self.logger.info(f"Similarity calculated: {similarity}")
-                return {"similarity": similarity}
-            except Exception as e:
-                self.logger.error(f"Error in similarity calculation: {str(e)}")
-                raise
+    def calculate_similarity(self, text1, text2, method='cosine'):
+        self.logger.debug("Starting similarity calculation")
+        try:
+            similarity = self.similarity_calculator.calculate_similarity(text1, text2, method)
+            self.logger.info(f"Similarity calculated using {method} method: {similarity}")
+            return {"similarity": similarity, "method": method}
+        except Exception as e:
+            self.logger.error(f"Error in similarity calculation: {str(e)}")
+            raise
 
     def extract_topics(self, texts, method='lda', num_topics=5):
         try:
