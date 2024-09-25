@@ -1,0 +1,183 @@
+Rapport d'analyse du projet
+
+Structure du projet :
+{
+    "analyze_project.php": {
+        "path": "analyze_project.php",
+        "size": 2634,
+        "issues": [
+            "Utilise API_URL"
+        ],
+        "constants": []
+    },
+    "data": {
+        "analyses": [],
+        "similarities": []
+    },
+    "index.php": {
+        "path": "index.php",
+        "size": 4926,
+        "issues": [],
+        "constants": []
+    },
+    "public": {
+        ".htaccess": {
+            "path": "public\/.htaccess",
+            "size": 214,
+            "issues": [],
+            "constants": []
+        },
+        "analyze_text.php": {
+            "path": "public\/analyze_text.php",
+            "size": 359,
+            "issues": [],
+            "constants": []
+        },
+        "batch_analysis.php": {
+            "path": "public\/batch_analysis.php",
+            "size": 3516,
+            "issues": [],
+            "constants": []
+        },
+        "similarity_test.php": {
+            "path": "public\/similarity_test.php",
+            "size": 8701,
+            "issues": [],
+            "constants": []
+        },
+        "submit_texts.php": {
+            "path": "public\/submit_texts.php",
+            "size": 1220,
+            "issues": [],
+            "constants": []
+        }
+    },
+    "src": {
+        "Config": {
+            "config.php": {
+                "path": "src\/Config\/config.php",
+                "size": 595,
+                "issues": [
+                    "Utilise API_URL"
+                ],
+                "constants": [
+                    "API_URL",
+                    "TEXTS_DIRECTORY",
+                    "ANALYSES_DIRECTORY",
+                    "SIMILARITIES_DIRECTORY",
+                    "MAX_TEXTS"
+                ]
+            }
+        },
+        "Controllers": {
+            "AnalyzeTextController.php": {
+                "path": "src\/Controllers\/AnalyzeTextController.php",
+                "size": 1442,
+                "issues": [],
+                "constants": []
+            },
+            "calculate_all_similarities.php": {
+                "path": "src\/Controllers\/calculate_all_similarities.php",
+                "size": 1114,
+                "issues": [],
+                "constants": []
+            },
+            "calculate_similarity.php": {
+                "path": "src\/Controllers\/calculate_similarity.php",
+                "size": 1085,
+                "issues": [],
+                "constants": []
+            },
+            "process_submission.php": {
+                "path": "src\/Controllers\/process_submission.php",
+                "size": 1040,
+                "issues": [],
+                "constants": []
+            }
+        },
+        "Helpers": [],
+        "Services": {
+            "APIClient.php": {
+                "path": "src\/Services\/APIClient.php",
+                "size": 1869,
+                "issues": [
+                    "Utilise API_URL"
+                ],
+                "constants": []
+            },
+            "DataVisualizer.php": {
+                "path": "src\/Services\/DataVisualizer.php",
+                "size": 4543,
+                "issues": [],
+                "constants": []
+            }
+        }
+    },
+    "texts": {
+        "submitted_text_1727234075_0.txt": {
+            "path": "texts\/submitted_text_1727234075_0.txt",
+            "size": 3703,
+            "issues": [],
+            "constants": []
+        },
+        "test4.txt": {
+            "path": "texts\/test4.txt",
+            "size": 2130,
+            "issues": [],
+            "constants": []
+        },
+        "text1.txt": {
+            "path": "texts\/text1.txt",
+            "size": 2130,
+            "issues": [],
+            "constants": []
+        },
+        "text2.txt": {
+            "path": "texts\/text2.txt",
+            "size": 4366,
+            "issues": [],
+            "constants": []
+        },
+        "text3.txt": {
+            "path": "texts\/text3.txt",
+            "size": 3680,
+            "issues": [],
+            "constants": []
+        }
+    }
+}
+
+Problèmes détectés :
+analyze_project.php
+  - Utilise API_URL
+data/
+  analyses/
+  similarities/
+index.php
+public/
+  public/.htaccess
+  public/analyze_text.php
+  public/batch_analysis.php
+  public/similarity_test.php
+  public/submit_texts.php
+src/
+  Config/
+    src/Config/config.php
+      - Utilise API_URL
+      Constants définies: API_URL, TEXTS_DIRECTORY, ANALYSES_DIRECTORY, SIMILARITIES_DIRECTORY, MAX_TEXTS
+  Controllers/
+    src/Controllers/AnalyzeTextController.php
+    src/Controllers/calculate_all_similarities.php
+    src/Controllers/calculate_similarity.php
+    src/Controllers/process_submission.php
+  Helpers/
+  Services/
+    src/Services/APIClient.php
+      - Utilise API_URL
+    src/Services/DataVisualizer.php
+texts/
+  texts/submitted_text_1727234075_0.txt
+  texts/test4.txt
+  texts/text1.txt
+  texts/text2.txt
+  texts/text3.txt
