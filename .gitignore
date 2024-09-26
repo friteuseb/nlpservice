@@ -3,7 +3,7 @@ venv/
 nlp_env/
 nlp_env_new/
 .env/
-
+.env
 
 # Ignore les fichiers de logs
 *.log*

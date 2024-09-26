@@ -7,3 +7,4 @@ flask-limiter
 scikit-learn
 flask_cors
 matplotlib
+python-dotenv
