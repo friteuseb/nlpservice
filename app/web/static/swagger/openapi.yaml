@@ -1,0 +1,362 @@
+openapi: 3.0.0
+info:
+  title: NLP Service - Plateforme d'Analyse Sémantique
+  description: |
+    Cette API offre des fonctionnalités avancées d'analyse de texte et de comparaison de similarité textuelle.
+    
+    Limites de taux :
+    - 200 requêtes par jour
+    - 50 requêtes par heure
+    - 10 requêtes par minute
+  version: 1.0.0
+  contact:
+    name: Cyril Wolfangel
+    url: https://www.linkedin.com/in/cyrilwolfangel/
+
+servers:
+  - url: https://nlpservice.semantic-suggestion.com/api
+
+paths:
+  /analyze:
+    post:
+      summary: Analyse de texte
+      description: Effectue une analyse complète du texte fourni, incluant l'analyse de sentiment, l'extraction de mots-clés, et plus encore.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzeRequest'
+            examples:
+              simple:
+                summary: Exemple simple
+                value:
+                  content: "TGEgcGx1aWUgZCdhdXRvbW5lIHRvbWJlIGRvdWNlbWVudCBzdXIgbGEgdmlsbGUsIGFwcG9ydGFudCB1bmUgYW1iaWFuY2UgbcOpbGFuY29saXF1ZSBldCBhcGFpc2FudGUgw6AgbGEgZm9pcy4="
+                  generate_sentiment_graph: false
+              advanced:
+                summary: Exemple avancé avec graphique de sentiment
+                value:
+                  content: "TGUgZMOpdmVsb3BwZW1lbnQgZHVyYWJsZSBlc3QgdW4gY29uY2VwdCBkZSBkw6l2ZWxvcHBlbWVudCBxdWkgcydhcHB1aWUgc3VyIHRyb2lzIHBpbGllcnMgOiBsJ8OpY29ub21pZSwgbGUgc29jaWFsIGV0IGwnZW52aXJvbm5lbWVudC4gSWwgdmlzZSDDoCByw6lwb25kcmUgYXV4IGJlc29pbnMgZHUgcHLDqXNlbnQgc2FucyBjb21wcm9tZXR0cmUgbGEgY2FwYWNpdMOpIGRlcyBnw6luw6lyYXRpb25zIGZ1dHVyZXMgw6Agc2F0aXNmYWlyZSBsZXVycyBwcm9wcmVzIGJlc29pbnMuIENldHRlIGFwcHJvY2hlIGhvbGlzdGlxdWUgZXN0IGVzc2VudGllbGxlIHBvdXIgYXNzdXJlciB1biBhdmVuaXIgZHVyYWJsZSBldCDDqXF1aWxpYnLDqSBwb3VyIG5vdHJlIHBsYW7DqHRlLg=="
+                  generate_sentiment_graph: true
+      responses:
+        '200':
+          description: Analyse réussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalysisResult'
+              examples:
+                simple:
+                  summary: Résultat d'analyse simple
+                  value:
+                    sentiment_analysis:
+                      overall_sentiment: "NEUTRAL"
+                      overall_score: 0.65
+                      sentiment_distribution:
+                        POSITIVE: 0.3
+                        NEGATIVE: 0.2
+                        NEUTRAL: 0.5
+                      sentence_sentiments:
+                        - text: "La pluie d'automne tombe doucement sur la ville, apportant une ambiance mélancolique et apaisante à la fois."
+                          sentiment: "NEUTRAL"
+                          score: 0.65
+                      dominant_emotion: "mélancolie"
+                      emotion_score: 0.7
+                    keyphrases: ["pluie d'automne", "ambiance mélancolique", "ville"]
+                    category: "Nature et Environnement"
+                    named_entities:
+                      - text: "automne"
+                        type: "DATE"
+                    readability_score: 78.5
+                    word_count: 15
+                    sentence_count: 1
+                    language: "fr"
+                    lexical_diversity: 0.93
+                    semantic_coherence: 0.85
+                    average_sentence_length: 15.0
+                advanced:
+                  summary: Résultat d'analyse avancé avec graphique
+                  value:
+                    sentiment_analysis:
+                      overall_sentiment: "POSITIVE"
+                      overall_score: 0.75
+                      sentiment_distribution:
+                        POSITIVE: 0.6
+                        NEGATIVE: 0.1
+                        NEUTRAL: 0.3
+                      sentence_sentiments:
+                        - text: "Le développement durable est un concept de développement qui s'appuie sur trois piliers : l'économie, le social et l'environnement."
+                          sentiment: "NEUTRAL"
+                          score: 0.5
+                        - text: "Il vise à répondre aux besoins du présent sans compromettre la capacité des générations futures à satisfaire leurs propres besoins."
+                          sentiment: "POSITIVE"
+                          score: 0.8
+                        - text: "Cette approche holistique est essentielle pour assurer un avenir durable et équilibré pour notre planète."
+                          sentiment: "POSITIVE"
+                          score: 0.9
+                      dominant_emotion: "espoir"
+                      emotion_score: 0.8
+                      sentiment_graph: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+                    keyphrases: ["développement durable", "trois piliers", "générations futures", "approche holistique"]
+                    category: "Environnement et Société"
+                    named_entities:
+                      - text: "économie"
+                        type: "CONCEPT"
+                      - text: "social"
+                        type: "CONCEPT"
+                      - text: "environnement"
+                        type: "CONCEPT"
+                    readability_score: 45.2
+                    word_count: 62
+                    sentence_count: 3
+                    language: "fr"
+                    lexical_diversity: 0.85
+                    semantic_coherence: 0.92
+                    average_sentence_length: 20.67
+        '400':
+          description: Requête invalide
+        '429':
+          description: Limite de taux dépassée
+        '500':
+          description: Erreur interne du serveur
+
+  /similarity:
+    post:
+      summary: Comparaison de similarité textuelle
+      description: Compare la similarité entre deux textes fournis en utilisant diverses méthodes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimilarityRequest'
+            examples:
+              simple:
+                summary: Comparaison simple
+                value:
+                  text1: "TGUgY2hhdCBkb3J0IHN1ciBsZSB0YXBpcy4="
+                  text2: "TGUgY2hpZW4gam91ZSBkYW5zIGxlIGphcmRpbi4="
+                  method: "cosine"
+              advanced:
+                summary: Comparaison avancée avec plusieurs méthodes
+                value:
+                  text1: "TGEgcHJvZ3JhbW1hdGlvbiBpbmZvcm1hdGlxdWUgZXN0IGwnYXJ0IGRlIGNyw6llciBkZXMgbG9naWNpZWxzIGV0IGRlcyBhcHBsaWNhdGlvbnMgcXVpIHLDqXNvbHZlbnQgZGVzIHByb2Jsw6htZXMgY29tcGxleGVzIGV0IGF1dG9tYXRpc2VudCBkZXMgdMOiY2hlcy4="
+                  text2: "TGUgZMOpdmVsb3BwZW1lbnQgbG9naWNpZWwgZXN0IHVuIHByb2Nlc3N1cyBjcsOpYXRpZiBxdWkgaW1wbGlxdWUgbGEgY29uY2VwdGlvbiwgbCfDqWNyaXR1cmUgZXQgbGEgbWFpbnRlbmFuY2UgZGUgcHJvZ3JhbW1lcyBpbmZvcm1hdGlxdWVzIHBvdXIgcsOpc291ZHJlIGRlcyBwcm9ibMOobWVzIHNww6ljaWZpcXVlcy4="
+                  methods: ["cosine", "jaccard", "euclidean"]
+      responses:
+        '200':
+          description: Comparaison réussie
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimilarityResult'
+              examples:
+                simple:
+                  summary: Résultat de comparaison simple
+                  value:
+                    similarity: 0.3245
+                    method: "cosine"
+                advanced:
+                  summary: Résultat de comparaison avancé
+                  value:
+                    similarities:
+                      cosine: 0.7823
+                      jaccard: 0.4567
+                      euclidean: 0.6789
+        '400':
+          description: Requête invalide
+        '429':
+          description: Limite de taux dépassée
+        '500':
+          description: Erreur interne du serveur
+
+  /extract_topics:
+    post:
+      summary: Extraction de sujets
+      description: Extrait les sujets principaux d'un ensemble de textes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopicExtractionRequest'
+            example:
+              texts: [
+                "TGEgcHJvZ3JhbW1hdGlvbiBvcmllbnTDqWUgb2JqZXQgZXN0IHVuIHBhcmFkaWdtZSBkZSBwcm9ncmFtbWF0aW9uIGluZm9ybWF0aXF1ZS4=",
+                "TCdpbnRlbGxpZ2VuY2UgYXJ0aWZpY2llbGxlIGVzdCB1biBkb21haW5lIGRlIGwnaW5mb3JtYXRpcXVlIGVuIHBsZWluIGVzc29yLg==",
+                "TGVzIHLDqXNlYXV4IGRlIG5ldXJvbmVzIHNvbnQgdXRpbGlzw6lzIGRhbnMgbCdhcHByZW50aXNzYWdlIHByb2ZvbmQu"
+              ]
+              num_topics: 3
+      responses:
+        '200':
+          description: Extraction réussie
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Topic'
+              example:
+                - words: ["programmation", "informatique", "objet"]
+                  weight: 0.35
+                - words: ["intelligence", "artificielle", "apprentissage"]
+                  weight: 0.40
+                - words: ["réseaux", "neurones", "profond"]
+                  weight: 0.25
+        '400':
+          description: Requête invalide
+        '429':
+          description: Limite de taux dépassée
+        '500':
+          description: Erreur interne du serveur
+
+components:
+  schemas:
+    AnalyzeRequest:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Texte à analyser, encodé en base64
+        generate_sentiment_graph:
+          type: boolean
+          description: Indique si un graphique de sentiment doit être généré
+          default: false
+      required:
+        - content
+
+    SimilarityRequest:
+      type: object
+      properties:
+        text1:
+          type: string
+          description: Premier texte à comparer, encodé en base64
+        text2:
+          type: string
+          description: Deuxième texte à comparer, encodé en base64
+        method:
+          type: string
+          description: Méthode de comparaison
+          enum: [cosine, euclidean, manhattan, jaccard, bleu]
+          default: cosine
+        methods:
+          type: array
+          items:
+            type: string
+            enum: [cosine, euclidean, manhattan, jaccard, bleu]
+          description: Liste des méthodes de comparaison à utiliser (pour comparaison avancée)
+      required:
+        - text1
+        - text2
+
+    TopicExtractionRequest:
+      type: object
+      properties:
+        texts:
+          type: array
+          items:
+            type: string
+          description: Liste de textes à analyser, encodés en base64
+        num_topics:
+          type: integer
+          description: Nombre de sujets à extraire
+          default: 3
+      required:
+        - texts
+
+    AnalysisResult:
+      type: object
+      properties:
+        sentiment_analysis:
+          $ref: '#/components/schemas/SentimentAnalysis'
+        keyphrases:
+          type: array
+          items:
+            type: string
+        category:
+          type: string
+        named_entities:
+          type: array
+          items:
+            $ref: '#/components/schemas/NamedEntity'
+        readability_score:
+          type: number
+        word_count:
+          type: integer
+        sentence_count:
+          type: integer
+        language:
+          type: string
+        lexical_diversity:
+          type: number
+        semantic_coherence:
+          type: number
+        average_sentence_length:
+          type: number
+
+    SentimentAnalysis:
+      type: object
+      properties:
+        overall_sentiment:
+          type: string
+          enum: [POSITIVE, NEGATIVE, NEUTRAL]
+        overall_score:
+          type: number
+        sentiment_distribution:
+          type: object
+          properties:
+            POSITIVE:
+              type: number
+            NEGATIVE:
+              type: number
+            NEUTRAL:
+              type: number
+        sentence_sentiments:
+          type: array
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+              sentiment:
+                type: string
+              score:
+                type: number
+        dominant_emotion:
+          type: string
+        emotion_score:
+          type: number
+        sentiment_graph:
+          type: string
+          description: Image du graphique de sentiment en base64 (si demandé)
+
+    NamedEntity:
+      type: object
+      properties:
+        text:
+          type: string
+        type:
+          type: string
+
+    SimilarityResult:
+      type: object
+      properties:
+        similarity:
+          type: number
+        method:
+          type: string
+        similarities:
+          type: object
+          additionalProperties:
+            type: number
+          description: Résultats de similarité pour plusieurs méthodes (pour comparaison avancée)
+
+    Topic:
+      type: object
+      properties:
+        words:
+          type: array
+          items:
+            type: string
+        weight:
+          type: number

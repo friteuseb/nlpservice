@@ -43,9 +43,27 @@
             padding: 10px;
             margin-bottom: 20px;
         }
+        .api-doc-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        .api-doc-link:hover {
+            background-color: #45a049;
+            color: white;
+        }
     </style>
 </head>
 <body>
+    <a href="{{ url_for('web.swagger_ui') }}" class="api-doc-link">Documentation API</a>
+
     <h1>NLP Service - Plateforme d'Analyse Sémantique</h1>
     <p>Bienvenue sur mon API de service NLP. Cette plateforme offre deux fonctionnalités principales : l'analyse de texte et la comparaison de similarité textuelle.</p>
 
