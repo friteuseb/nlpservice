@@ -1,0 +1,276 @@
+{
+    "average_sentence_length": 20.558823529411764,
+    "category": "Non cat\u00e9goris\u00e9",
+    "keyphrases": [
+        "faire",
+        "centraux",
+        "agenc\u00e9",
+        "dormir",
+        "peut"
+    ],
+    "language": "fr",
+    "lexical_diversity": 0.3361945636623748,
+    "named_entities": [
+        {
+            "text": "sommier",
+            "type": "LOC"
+        },
+        {
+            "text": "sommier",
+            "type": "PER"
+        },
+        {
+            "text": "van",
+            "type": "PER"
+        },
+        {
+            "text": "van",
+            "type": "MISC"
+        },
+        {
+            "text": "votre van",
+            "type": "MISC"
+        },
+        {
+            "text": "Le van",
+            "type": "MISC"
+        }
+    ],
+    "readability_score": 100,
+    "semantic_coherence": 0.1799649554467125,
+    "sentence_count": 34,
+    "sentiment_analysis": {
+        "dominant_emotion": "joy",
+        "emotion_score": 0.8111661076545715,
+        "overall_score": 0.5345840454101562,
+        "overall_sentiment": "5 stars",
+        "sentence_sentiments": [
+            {
+                "score": 0.4544236660003662,
+                "sentiment": "4 stars",
+                "text": "Choisir des \u00e9l\u00e9ments de literie et de d\u00e9coration\nPour bien dormir dans votre lit, vous avez besoin d\u2019un cocon confortable."
+            },
+            {
+                "score": 0.4748031795024872,
+                "sentiment": "5 stars",
+                "text": "Dans l\u2019espace chambre du van, cela se concr\u00e9tise par un matelas, une couette, du linge de lit, et des objets d\u00e9co et confortables."
+            },
+            {
+                "score": 0.2846149206161499,
+                "sentiment": "4 stars",
+                "text": "\n\n\n"
+            },
+            {
+                "score": 0.28040221333503723,
+                "sentiment": "5 stars",
+                "text": "Matelas et sommier"
+            },
+            {
+                "score": 0.3953164517879486,
+                "sentiment": "5 stars",
+                "text": "dans un van\n"
+            },
+            {
+                "score": 0.3549960255622864,
+                "sentiment": "4 stars",
+                "text": "Les fabricants de matelas et de sommier pour van ont compris l\u2019importance du sommeil dans une vie nomade."
+            },
+            {
+                "score": 0.45852774381637573,
+                "sentiment": "4 stars",
+                "text": "Le lit est l\u2019espace central, avec la cuisine, pour avoir tout le confort n\u00e9cessaire."
+            },
+            {
+                "score": 0.4610100984573364,
+                "sentiment": "5 stars",
+                "text": "Faites le choix d\u2019un matelas et d\u2019un sommier adapt\u00e9 \u00e0 votre type de sommeil."
+            },
+            {
+                "score": 0.39195534586906433,
+                "sentiment": "5 stars",
+                "text": "Si vous pr\u00e9voyez de longues sorties en randonn\u00e9es, trouvez un matelas et un sommier qui vous apporteront tout le confort n\u00e9cessaire au repos de votre corps."
+            },
+            {
+                "score": 0.5120765566825867,
+                "sentiment": "3 stars",
+                "text": "Pour l\u2019aspect esth\u00e9tique, pr\u00e9f\u00e9rez un sommier en bois plus l\u00e9ger et un matelas avec une touche de couleur pour une ambiance plus vive.\n\nCouette et literie dans un van\nDans votre espace de chambre dans le van, vous avez besoin d\u2019une couette et d\u2019un ensemble de linge de lit confortable."
+            },
+            {
+                "score": 0.299489825963974,
+                "sentiment": "3 stars",
+                "text": "Lors du coucher, vous devez vous sentir comme dans un nid douillet."
+            },
+            {
+                "score": 0.35563746094703674,
+                "sentiment": "3 stars",
+                "text": "Pour \u00e9viter que votre couette ne soit trop encombrante, pr\u00e9voyez dans la pi\u00e8ce, un am\u00e9nagement particulier pour la stocker sans la salir."
+            },
+            {
+                "score": 0.3891056776046753,
+                "sentiment": "4 stars",
+                "text": "Votre linge de lit peut faire partie des \u00e9l\u00e9ments de d\u00e9co de votre int\u00e9rieur avec des couleurs chaleureuses."
+            },
+            {
+                "score": 0.6281954050064087,
+                "sentiment": "3 stars",
+                "text": "Sinon, pr\u00e9voyez un rangement sp\u00e9cifique pour votre linge de lit.\n\nCoussins et objets de d\u00e9coration autour du lit\nLes coussins sont les \u00e9l\u00e9ments de d\u00e9co pr\u00e9sents dans chaque pi\u00e8ce de vie."
+            },
+            {
+                "score": 0.45715153217315674,
+                "sentiment": "3 stars",
+                "text": "Il est normal de les retrouver dans un van."
+            },
+            {
+                "score": 0.37207067012786865,
+                "sentiment": "3 stars",
+                "text": "Si vous \u00eates \u00e0 la recherche d\u2019astuces tendance, sachez que vous pouvez facilement transformer votre coussin de couchage en coussin pour votre banquette."
+            },
+            {
+                "score": 0.44334471225738525,
+                "sentiment": "4 stars",
+                "text": "Dans ce cas, faites le choix d\u2019un coussin qui suit avec le style de votre int\u00e9rieur au niveau des couleurs et des mat\u00e9riaux."
+            },
+            {
+                "score": 0.36612293124198914,
+                "sentiment": "3 stars",
+                "text": "Un coussin marron en coton molletonn\u00e9 peut apporter une touche de luxe dans un am\u00e9nagement en bois.\n\n"
+            },
+            {
+                "score": 0.38039523363113403,
+                "sentiment": "2 stars",
+                "text": "La chambre \u00e0 coucher est une pi\u00e8ce qui ne contient pas seulement un matelas."
+            },
+            {
+                "score": 0.42057865858078003,
+                "sentiment": "4 stars",
+                "text": "Plusieurs accessoires vont entourer cet espace exigu dans le van pour faciliter la vie et le sommeil."
+            },
+            {
+                "score": 0.48190438747406006,
+                "sentiment": "5 stars",
+                "text": "Pour rester dans le m\u00eame style que la d\u00e9co de votre van, installez des objets tendances et pratiques."
+            },
+            {
+                "score": 0.36905568838119507,
+                "sentiment": "4 stars",
+                "text": "Un filet de rangement, un coffre de lit ou des porte-bijoux peuvent apporter un effet cosy dans votre int\u00e9rieur.\n\n"
+            },
+            {
+                "score": 0.3885813057422638,
+                "sentiment": "4 stars",
+                "text": "Am\u00e9nager l\u2019espace de sommeil dans un van\nPas facile de cr\u00e9er un espace confortable quand la cuisine et la salle de bain se trouvent dans la m\u00eame pi\u00e8ce."
+            },
+            {
+                "score": 0.5837374925613403,
+                "sentiment": "5 stars",
+                "text": "Le van impose une rigueur d\u2019organisation indispensable."
+            },
+            {
+                "score": 0.4703245460987091,
+                "sentiment": "3 stars",
+                "text": "Voici quelques conseils pour cr\u00e9er un lieu de vie sur mesure.\n\n"
+            },
+            {
+                "score": 0.3677043318748474,
+                "sentiment": "4 stars",
+                "text": "L\u2019agencement du lit\n"
+            },
+            {
+                "score": 0.33738428354263306,
+                "sentiment": "3 stars",
+                "text": "Le lit fait partie des meubles centraux dans un van."
+            },
+            {
+                "score": 0.4166087806224823,
+                "sentiment": "4 stars",
+                "text": "Qu\u2019il soit sur mesure, aux dimensions de votre int\u00e9rieur ou standard, votre couchage doit \u00eatre de qualit\u00e9 et agenc\u00e9 de la bonne fa\u00e7on."
+            },
+            {
+                "score": 0.5881047248840332,
+                "sentiment": "1 star",
+                "text": "Ne placez pas votre t\u00eate de lit \u00e0 c\u00f4t\u00e9 de la glaci\u00e8re \u00e9lectrique qui fait du bruit."
+            },
+            {
+                "score": 0.48331090807914734,
+                "sentiment": "3 stars",
+                "text": "Pr\u00e9f\u00e9rez une installation du matelas en longueur et n\u2019h\u00e9sitez pas \u00e0 le choisir pliable pour le transformer facilement en banquette.\n\n"
+            },
+            {
+                "score": 0.41453737020492554,
+                "sentiment": "5 stars",
+                "text": "L\u2019utilisation du bois dans le design int\u00e9rieur\nParmi les astuces pratiques pour \u00e0 la fois \u00e9conomiser du poids et am\u00e9liorer la d\u00e9coration de votre van, l\u2019utilisation du bois est souvent cit\u00e9e."
+            },
+            {
+                "score": 0.47557196021080017,
+                "sentiment": "5 stars",
+                "text": "Le bois est \u00e0 la fois durable et tendance dans les vans."
+            },
+            {
+                "score": 0.479592502117157,
+                "sentiment": "4 stars",
+                "text": "Il permet de cr\u00e9er des meubles sur mesure dans des essences nobles.\n\n"
+            },
+            {
+                "score": 0.4331594407558441,
+                "sentiment": "5 stars",
+                "text": "Le bois apporte du luxe et du design."
+            },
+            {
+                "score": 0.4570738673210144,
+                "sentiment": "4 stars",
+                "text": "Il permet de personnaliser votre environnement en fonction de vos pr\u00e9f\u00e9rences."
+            },
+            {
+                "score": 0.3876872956752777,
+                "sentiment": "4 stars",
+                "text": "Vous trouverez de nombreuses id\u00e9es d\u2019am\u00e9nagement de votre espace de nuit en bois dans la communaut\u00e9 vanlife en ligne.\n"
+            }
+        ],
+        "sentiment_distribution": {
+            "1 star": 0.027777777777777776,
+            "2 stars": 0.027777777777777776,
+            "3 stars": 0.2777777777777778,
+            "4 stars": 0.3888888888888889,
+            "5 stars": 0.2777777777777778
+        },
+        "sentiment_graph": null
+    },
+    "top_n_grams": [
+        [
+            [
+                "linge",
+                "lit"
+            ],
+            4
+        ],
+        [
+            [
+                "avoir",
+                "besoin"
+            ],
+            2
+        ],
+        [
+            [
+                "espace",
+                "chambre"
+            ],
+            2
+        ],
+        [
+            [
+                "confort",
+                "n\u00e9cessaire"
+            ],
+            2
+        ],
+        [
+            [
+                "faire",
+                "choix"
+            ],
+            2
+        ]
+    ],
+    "word_count": 699
+}
