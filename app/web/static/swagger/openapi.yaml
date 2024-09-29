@@ -209,7 +209,52 @@ paths:
           description: Limite de taux dépassée
         '500':
           description: Erreur interne du serveur
-
+  /batch_similarity:
+    post:
+      summary: Calcul de similarité textuelle par lots
+      description: Compare la similarité entre plusieurs paires de textes en une seule requête.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatchSimilarityRequest'
+            example:
+              text_pairs: [
+                {
+                  "text1": "TGUgc29sZWlsIGJyaWxsZSBkYW5zIGxlIGNpZWwgYmxldS4=",
+                  "text2": "TGVzIG51YWdlcyBjYWNoZW50IGxlIHNvbGVpbCBhdWpvdXJkJ2h1aS4="
+                },
+                {
+                  "text1": "SidhaW1lIGxlIGNhZsOpIGF1IGxhaXQu",
+                  "text2": "TGUgdGjDqSB2ZXJ0IGVzdCBtYSBib2lzc29uIHByw6lmw6lyw6llLg=="
+                }
+              ]
+              method: "cosine"
+      responses:
+        '200':
+          description: Calcul de similarité par lots réussi
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatchSimilarityResult'
+              example:
+                results: [
+                  {
+                    "method": "cosine",
+                    "similarity": 0.24235771956792362
+                  },
+                  {
+                    "method": "cosine",
+                    "similarity": 0.09349477497536716
+                  }
+                ]
+        '400':
+          description: Requête invalide
+        '429':
+          description: Limite de taux dépassée
+        '500':
+          description: Erreur interne du serveur
 components:
   schemas:
     AnalyzeRequest:
@@ -350,7 +395,38 @@ components:
           additionalProperties:
             type: number
           description: Résultats de similarité pour plusieurs méthodes (pour comparaison avancée)
+          
+    BatchSimilarityRequest:
+      type: object
+      properties:
+        text_pairs:
+          type: array
+          items:
+            type: object
+            properties:
+              text1:
+                type: string
+                description: Premier texte de la paire, encodé en base64
+              text2:
+                type: string
+                description: Deuxième texte de la paire, encodé en base64
+          description: Liste des paires de textes à comparer
+        method:
+          type: string
+          description: Méthode de comparaison à utiliser pour toutes les paires
+          enum: [cosine, euclidean, manhattan, jaccard, bleu]
+          default: cosine
+      required:
+        - text_pairs
 
+    BatchSimilarityResult:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimilarityResult'
+          description: Liste des résultats de similarité pour chaque paire de textes
     Topic:
       type: object
       properties:
