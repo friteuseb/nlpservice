@@ -13,6 +13,7 @@ limiter = Limiter(key_func=get_remote_address)
 
 api_bp = Blueprint('api', __name__)
 nlp_analyzer = NLPAnalyzer()
+similarity_calculator = SimilarityCalculator()
 
 @api_bp.route('/analyze', methods=['POST'])
 @limiter.limit("5 per minute")
@@ -78,6 +79,7 @@ def calculate_similarity():
 
 
 
+
 @api_bp.route('/batch_similarity', methods=['POST'])
 @limiter.limit("3 per minute")  # Ajustez cette limite selon vos besoins
 def batch_similarity():
@@ -89,36 +91,26 @@ def batch_similarity():
 
     text_pairs = data['text_pairs']
     method = data.get('method', 'cosine')
-    max_concurrent = min(len(text_pairs), 10)  # Limite à 10 calculs simultanés
 
     current_app.logger.debug(f"Processing {len(text_pairs)} pairs with method: {method}")
 
-    nlp_analyzer = current_app.nlp_analyzer
-
-    def calculate_similarity(text1, text2):
-        try:
-            return nlp_analyzer.calculate_similarity(text1, text2, method)
-        except Exception as e:
-            current_app.logger.error(f"Error in similarity calculation: {str(e)}")
-            return {"error": str(e)}
-
-    with ThreadPoolExecutor(max_workers=max_concurrent) as executor:
-        futures = []
+    try:
+        decoded_pairs = []
         for pair in text_pairs:
             try:
                 text1 = base64.b64decode(pair['text1']).decode('utf-8')
                 text2 = base64.b64decode(pair['text2']).decode('utf-8')
-                futures.append(executor.submit(calculate_similarity, text1, text2))
+                decoded_pairs.append({'text1': text1, 'text2': text2})
             except Exception as e:
                 current_app.logger.error(f"Error decoding text pair: {str(e)}")
-                futures.append(executor.submit(lambda: {"error": str(e)}))
-        
-        results = []
-        for future in futures:
-            results.append(future.result())
+                return jsonify({"error": f"Error decoding text pair: {str(e)}"}), 400
 
-    current_app.logger.debug(f"Batch similarity calculation completed. Results: {results}")
-    return jsonify({"results": results})
+        results = similarity_calculator.calculate_batch_similarity(decoded_pairs, method)
+        current_app.logger.debug(f"Batch similarity calculation completed. Results: {results}")
+        return jsonify({"results": results})
+    except Exception as e:
+        current_app.logger.error(f"Error in batch similarity calculation: {str(e)}")
+        return jsonify({"error": f"Error during calculation: {str(e)}"}), 500
 
     
 @api_bp.route('/extract_topics', methods=['POST'])
