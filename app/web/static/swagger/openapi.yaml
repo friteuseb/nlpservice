@@ -255,6 +255,97 @@ paths:
           description: Limite de taux dépassée
         '500':
           description: Erreur interne du serveur
+          
+  /add_texts:
+      post:
+        summary: Ajouter des textes à l'index FAISS
+        description: Ajoute ou met à jour des textes dans l'index FAISS pour la recherche de similarité.
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddTextsRequest'
+        responses:
+          '200':
+            description: Textes ajoutés avec succès
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: "Added/Updated 5 texts"
+          '400':
+            description: Requête invalide
+          '429':
+            description: Limite de taux dépassée
+          '500':
+            description: Erreur interne du serveur
+
+  /find_similar:
+    post:
+      summary: Trouver des textes similaires
+      description: Recherche des textes similaires à un texte donné dans l'index FAISS.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FindSimilarRequest'
+      responses:
+        '200':
+          description: Recherche de similarité réussie
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SimilarTextResult'
+        '400':
+          description: Requête invalide
+        '404':
+          description: Texte non trouvé
+        '429':
+          description: Limite de taux dépassée
+        '500':
+          description: Erreur interne du serveur
+
+  /faiss_similarity_status:
+    get:
+      summary: Obtenir le statut de l'index FAISS
+      description: Récupère des informations sur l'état actuel de l'index FAISS.
+      responses:
+        '200':
+          description: Statut récupéré avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FAISSStatus'
+        '500':
+          description: Erreur interne du serveur
+
+  /clear_faiss_index:
+    post:
+      summary: Réinitialiser l'index FAISS
+      description: Efface tous les textes de l'index FAISS et le réinitialise.
+      responses:
+        '200':
+          description: Index FAISS réinitialisé avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "FAISS index cleared"
+        '429':
+          description: Limite de taux dépassée
+        '500':
+          description: Erreur interne du serveur
+
 components:
   schemas:
     AnalyzeRequest:
@@ -436,3 +527,53 @@ components:
             type: string
         weight:
           type: number
+
+    AddTextsRequest:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              text:
+                type: string
+          description: Liste des textes à ajouter ou mettre à jour
+      required:
+        - items
+
+    FindSimilarRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID du texte pour lequel rechercher des similaires
+        k:
+          type: integer
+          description: Nombre de textes similaires à retourner
+          default: 5
+      required:
+        - id
+
+    SimilarTextResult:
+      type: object
+      properties:
+        id:
+          type: string
+        text:
+          type: string
+        similarity:
+          type: number
+          format: float
+
+    FAISSStatus:
+      type: object
+      properties:
+        num_texts:
+          type: integer
+          description: Nombre de textes dans l'index
+        index_size:
+          type: integer
+          description: Taille de l'index FAISS

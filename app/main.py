@@ -7,6 +7,7 @@ from logging.handlers import RotatingFileHandler
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from .nlp.analyzer import NLPAnalyzer
+from .nlp.faiss_similarity import FAISSSimilarity 
 from .api.routes import api_bp
 from .web.routes import web_bp
 from .config import Config
@@ -56,7 +57,9 @@ def create_app():
 
     load_nltk_resources()
 
-    app.nlp_analyzer = NLPAnalyzer()
+    with app.app_context():
+        app.nlp_analyzer = NLPAnalyzer()
+        app.faiss_similarity = FAISSSimilarity(app)
 
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(web_bp)

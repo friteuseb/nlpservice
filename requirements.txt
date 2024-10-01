@@ -8,3 +8,5 @@ scikit-learn
 flask_cors
 matplotlib
 python-dotenv
+faiss-cpu
+sentence-transformers

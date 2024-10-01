@@ -129,6 +129,77 @@ def extract_topics():
         current_app.logger.error(f"Error in topic extraction: {str(e)}")
         return jsonify({"error": f"Topic extraction failed: {str(e)}"}), 500
 
+@api_bp.route('/faiss_similarity_status', methods=['GET'])
+def get_faiss_similarity_status():
+    try:
+        status = current_app.faiss_similarity.get_status()
+        return jsonify(status)
+    except Exception as e:
+        current_app.logger.error(f"Error getting FAISS status: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/add_texts', methods=['POST'])
+@limiter.limit("5 per minute")
+def add_texts():
+    try:
+        current_app.logger.info("Requête reçue pour add_texts")
+        data = request.json
+        if not data or 'items' not in data:
+            current_app.logger.warning("Format d'entrée invalide pour add_texts")
+            return jsonify({"error": "Invalid input format"}), 400
+        
+        items = data['items']
+        current_app.logger.info(f"Nombre d'items reçus : {len(items)}")
+        
+        current_app.logger.debug(f"Premier item : {items[0]}")  # Log le premier item pour vérification
+        
+        num_added = current_app.faiss_similarity.add_texts(items)
+        current_app.logger.info(f"Nombre de textes ajoutés : {num_added}")
+        
+        return jsonify({"message": f"Added/Updated {num_added} texts"})
+    except Exception as e:
+        current_app.logger.error(f"Erreur lors de l'ajout de textes à FAISS: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/find_similar', methods=['POST'])
+@limiter.limit("10 per minute")
+def find_similar():
+    try:
+        data = request.json
+        if not data or 'id' not in data:
+            return jsonify({"error": "Invalid input format"}), 400
+        
+        item_id = data['id']
+        k = data.get('k', 5)
+        results = current_app.faiss_similarity.find_similar(item_id, k)
+        if results is None:
+            return jsonify({"error": "Text not found"}), 404
+        return jsonify(results)
+    except Exception as e:
+        current_app.logger.error(f"Error finding similar texts: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@api_bp.route('/clear_faiss_index', methods=['POST'])
+@limiter.limit("1 per hour")
+def clear_faiss_index():
+    try:
+        current_app.logger.info("Requête reçue pour clear_faiss_index")
+        
+        if not hasattr(current_app, 'faiss_similarity'):
+            current_app.logger.error("L'attribut faiss_similarity n'est pas présent dans l'application")
+            return jsonify({"error": "FAISS Similarity not initialized"}), 500
+        
+        result = current_app.faiss_similarity.clear_index()
+        if result:
+            current_app.logger.info("Index FAISS nettoyé avec succès")
+            return jsonify({"message": "FAISS index cleared successfully"})
+        else:
+            current_app.logger.warning("Le nettoyage de l'index FAISS n'a pas retourné True")
+            return jsonify({"error": "Unexpected result from clear_index"}), 500
+    except Exception as e:
+        current_app.logger.error(f"Erreur lors du nettoyage de l'index FAISS: {str(e)}", exc_info=True)
+        return jsonify({"error": f"Error clearing FAISS index: {str(e)}"}), 500
 
 @api_bp.errorhandler(429)
 def ratelimit_handler(e):
@@ -138,3 +209,6 @@ def ratelimit_handler(e):
 def handle_exception(e):
     current_app.logger.error(f"Unhandled exception: {str(e)}")
     return jsonify({"error": "An unexpected error occurred"}), 500
+
+
+
