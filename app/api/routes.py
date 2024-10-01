@@ -142,8 +142,10 @@ def get_faiss_similarity_status():
 @limiter.limit("5 per minute")
 def add_texts():
     try:
-        current_app.logger.info("Requête reçue pour add_texts")
+        current_app.logger.info("Début de la route add_texts")
         data = request.json
+        current_app.logger.debug(f"Données reçues : {data}")
+        
         if not data or 'items' not in data:
             current_app.logger.warning("Format d'entrée invalide pour add_texts")
             return jsonify({"error": "Invalid input format"}), 400
@@ -151,8 +153,13 @@ def add_texts():
         items = data['items']
         current_app.logger.info(f"Nombre d'items reçus : {len(items)}")
         
-        current_app.logger.debug(f"Premier item : {items[0]}")  # Log le premier item pour vérification
+        if not items:
+            current_app.logger.warning("Liste d'items vide")
+            return jsonify({"error": "Empty item list"}), 400
         
+        current_app.logger.debug(f"Premier item : {items[0]}")
+        
+        current_app.logger.info("Appel de la méthode add_texts de FAISSSimilarity")
         num_added = current_app.faiss_similarity.add_texts(items)
         current_app.logger.info(f"Nombre de textes ajoutés : {num_added}")
         
@@ -160,6 +167,7 @@ def add_texts():
     except Exception as e:
         current_app.logger.error(f"Erreur lors de l'ajout de textes à FAISS: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+
 
 @api_bp.route('/find_similar', methods=['POST'])
 @limiter.limit("10 per minute")
