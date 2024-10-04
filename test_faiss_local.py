@@ -23,15 +23,20 @@ def send_request(endpoint, method='GET', data=None):
 def basic_test():
     start_time = time.time()
 
-    # 1. Vérification du statut initial
+    print("\n1. Vérification du statut initial...")
     status = send_request("faiss_status")
     if not status:
-        return "Échec du test basique"
-    
-    # 2. Réinitialisation de l'index
-    send_request("reset_faiss_index", method='POST')
+        return "Échec lors de la vérification du statut initial."
+    print("Statut initial obtenu.")
 
-    # 3. Ajout de textes
+    print("\n2. Réinitialisation de l'index FAISS...")
+    reset_result = send_request("reset_faiss_index", method='POST')
+    if reset_result:
+        print("Index réinitialisé avec succès.")
+    else:
+        return "Échec lors de la réinitialisation de l'index."
+
+    print("\n3. Ajout de textes dans l'index FAISS...")
     texts = [
         {"id": "1", "text": "L'intelligence artificielle transforme notre monde."},
         {"id": "2", "text": "Les algorithmes de machine learning sont de plus en plus sophistiqués."},
@@ -39,10 +44,18 @@ def basic_test():
         {"id": "4", "text": "Le traitement du langage naturel améliore les assistants virtuels."},
         {"id": "5", "text": "L'apprentissage par renforcement est utilisé dans les jeux et la robotique."}
     ]
-    send_request("add_texts", method='POST', data={"items": texts})
+    add_result = send_request("add_texts", method='POST', data={"items": texts})
+    if add_result:
+        print("Textes ajoutés avec succès.")
+    else:
+        return "Échec lors de l'ajout des textes."
 
-    # 4. Recherche de textes similaires
-    send_request("find_similar", method='POST', data={"id": "1", "k": 3})
+    print("\n4. Recherche de textes similaires...")
+    similar_result = send_request("find_similar", method='POST', data={"id": "1", "k": 3})
+    if similar_result:
+        print("Recherche de textes similaires effectuée avec succès.")
+    else:
+        return "Échec lors de la recherche de textes similaires."
 
     end_time = time.time()
     return f"Test basique terminé en {end_time - start_time:.2f} secondes."
@@ -50,9 +63,13 @@ def basic_test():
 # Test avec plusieurs requêtes séquentielles
 def multiple_requests_test(num_requests=10):
     start_time = time.time()
+    print(f"\nEnvoi de {num_requests} requêtes séquentielles...")
+
     for i in range(1, num_requests + 1):
+        print(f"  - Requête {i} sur {num_requests}...")
         send_request("find_similar", method='POST', data={"id": "1", "k": 3})
         time.sleep(0.1)  # Pause pour éviter la surcharge
+
     end_time = time.time()
     return f"Test avec {num_requests} requêtes séquentielles terminé en {end_time - start_time:.2f} secondes."
 
@@ -63,7 +80,10 @@ def parallel_requests_test(num_threads=10):
     
     start_time = time.time()
     threads = []
+    print(f"\nLancement de {num_threads} requêtes parallèles...")
+
     for i in range(1, num_threads + 1):
+        print(f"  - Démarrage de la requête parallèle {i}...")
         thread = threading.Thread(target=send_similar_request_threaded, args=(str(i), 3))
         threads.append(thread)
         thread.start()
@@ -76,7 +96,7 @@ def parallel_requests_test(num_threads=10):
 
 # Menu interactif
 def show_menu():
-    print("=== Menu des Tests de Performance ===")
+    print("\n=== Menu des Tests de Performance ===")
     print("1. Test basique (statut, reset, ajout, recherche)")
     print("2. Test avec plusieurs requêtes séquentielles")
     print("3. Test avec des requêtes parallèles")
