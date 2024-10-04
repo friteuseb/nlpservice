@@ -3,21 +3,43 @@ import json
 import time
 import threading
 
+import os
+import requests
+from dotenv import load_dotenv
+import json
+import time
+import threading
+
+# Charger les variables d'environnement depuis le fichier .env
+load_dotenv()
+
+# Récupérer la clé API à partir des variables d'environnement
+API_KEY = os.getenv('API_KEY')
+
 BASE_URL = "https://nlpservice.semantic-suggestion.com/api"
 
-# Fonction pour envoyer une requête à l'API
+# Fonction pour envoyer une requête à l'API avec l'API Key
 def send_request(endpoint, method='GET', data=None):
     url = f"{BASE_URL}/{endpoint}"
+    headers = {
+        "X-API-Key": API_KEY  # Utilisation de la clé API sécurisée
+    }
     try:
         if method == 'GET':
-            response = requests.get(url)
+            response = requests.get(url, headers=headers)
         elif method == 'POST':
-            response = requests.post(url, json=data)
+            response = requests.post(url, json=data, headers=headers)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
         print(f"Erreur lors de la requête à {url}: {str(e)}")
         return None
+
+# Exemple d'utilisation
+if __name__ == "__main__":
+    response = send_request("faiss_status")
+    print(json.dumps(response, indent=2) if response else "Aucune réponse reçue.")
+
 
 # Textes réalistes de 300 mots environ
 def realistic_texts():

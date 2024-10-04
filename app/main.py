@@ -19,10 +19,10 @@ load_dotenv()  # Charge les variables d'environnement depuis .env
 gc.set_threshold(700, 10, 10)
 
 def rate_limit_key_func():
-    ip = get_remote_address()
-    if ip == os.getenv('PERSONAL_IP'):
+    api_key = request.headers.get('X-API-Key')
+    if api_key and api_key == Config.API_KEY:
         return "no_limit"  # Cette clé spéciale ne sera pas limitée
-    return ip
+    return get_remote_address()
 
 limiter = Limiter(key_func=rate_limit_key_func, default_limits=["200 per day", "50 per hour"])
 
