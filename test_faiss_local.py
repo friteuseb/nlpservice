@@ -19,6 +19,44 @@ def send_request(endpoint, method='GET', data=None):
         print(f"Erreur lors de la requête à {url}: {str(e)}")
         return None
 
+# Textes réalistes de 300 mots environ
+def realistic_texts():
+    return [
+        {"id": "1", "text": "L'intelligence artificielle (IA) est en train de transformer de nombreux secteurs industriels, "
+         "de la santé à l'automobile, en passant par la finance. L'apprentissage automatique, une sous-branche de l'IA, "
+         "permet de développer des modèles capables d'apprendre et de s'améliorer à partir des données sans être explicitement "
+         "programmés. Les applications de l'IA vont des diagnostics médicaux à la conduite autonome, en passant par les algorithmes "
+         "de recommandation utilisés par des géants du numérique comme Netflix ou Amazon. Cependant, l'IA pose aussi des défis "
+         "éthiques importants, notamment en ce qui concerne la vie privée, la transparence des décisions algorithmiques et les biais "
+         "inhérents aux données utilisées pour entraîner ces modèles. Alors que les entreprises et les gouvernements explorent les "
+         "potentiels de l'IA, il est essentiel de mettre en place des cadres réglementaires robustes pour garantir une utilisation "
+         "responsable et éthique de ces technologies."},
+        
+        {"id": "2", "text": "Le changement climatique est l'un des défis mondiaux les plus pressants auxquels l'humanité est confrontée "
+         "aujourd'hui. Les scientifiques s'accordent à dire que les émissions de gaz à effet de serre d'origine humaine, principalement "
+         "le dioxyde de carbone et le méthane, sont les principales causes du réchauffement planétaire. Si des mesures drastiques ne sont "
+         "pas prises rapidement pour limiter ces émissions, les conséquences pourraient être catastrophiques, avec des phénomènes météorologiques "
+         "extrêmes, une élévation du niveau des mers et des pertes massives de biodiversité. Des solutions existent pourtant pour atténuer le "
+         "changement climatique, telles que l'adoption des énergies renouvelables, la protection des forêts et la transition vers des systèmes "
+         "alimentaires plus durables. Les gouvernements, les entreprises et les citoyens ont tous un rôle à jouer dans la lutte contre ce défi global."},
+        
+        {"id": "3", "text": "La révolution numérique a bouleversé nos modes de vie, transformant non seulement la manière dont nous communiquons, "
+         "mais aussi celle dont nous travaillons, apprenons et consommons. L'accès à l'information est devenu instantané, les réseaux sociaux "
+         "permettant de connecter des individus et des communautés du monde entier. Cependant, cette ère numérique apporte également son lot de "
+         "défis, notamment en termes de protection des données personnelles, de cybercriminalité et de désinformation. Les entreprises technologiques "
+         "sont désormais au centre de ces problématiques, et les régulateurs du monde entier cherchent à encadrer l'utilisation des technologies afin "
+         "d'assurer un équilibre entre innovation et respect des droits des utilisateurs. Dans ce contexte, l'éducation aux compétences numériques et "
+         "la maîtrise des outils technologiques deviennent essentielles pour naviguer dans un monde de plus en plus connecté."},
+        
+        {"id": "4", "text": "L'exploration spatiale continue de captiver l'imagination des scientifiques et du grand public. Depuis les premiers pas "
+         "de l'homme sur la Lune, les avancées technologiques ont permis de repousser les limites de l'exploration humaine et robotique de l'espace. "
+         "Des missions récentes, telles que l'atterrissage du rover Perseverance sur Mars ou l'envoi de sondes à destination de planètes lointaines, "
+         "ouvrent la voie à une meilleure compréhension de notre système solaire. Les projets de colonisation de la Lune ou de Mars ne sont plus de la "
+         "science-fiction, mais des ambitions concrètes portées par des agences spatiales comme la NASA et des entreprises privées comme SpaceX. "
+         "Cependant, ces projets soulèvent également des questions sur la viabilité de la vie humaine dans des environnements extraterrestres et les "
+         "impacts éthiques de l'exploration et de la colonisation de nouveaux mondes."}
+    ]
+
 # Test de performance simple (statut, reset, ajout, recherche)
 def basic_test():
     start_time = time.time()
@@ -36,14 +74,8 @@ def basic_test():
     else:
         return "Échec lors de la réinitialisation de l'index."
 
-    print("\n3. Ajout de textes dans l'index FAISS...")
-    texts = [
-        {"id": "1", "text": "L'intelligence artificielle transforme notre monde."},
-        {"id": "2", "text": "Les algorithmes de machine learning sont de plus en plus sophistiqués."},
-        {"id": "3", "text": "Le deep learning révolutionne la reconnaissance d'images."},
-        {"id": "4", "text": "Le traitement du langage naturel améliore les assistants virtuels."},
-        {"id": "5", "text": "L'apprentissage par renforcement est utilisé dans les jeux et la robotique."}
-    ]
+    print("\n3. Ajout de textes réalistes dans l'index FAISS...")
+    texts = realistic_texts()
     add_result = send_request("add_texts", method='POST', data={"items": texts})
     if add_result:
         print("Textes ajoutés avec succès.")
@@ -94,14 +126,30 @@ def parallel_requests_test(num_threads=10):
     end_time = time.time()
     return f"Test avec {num_threads} requêtes parallèles terminé en {end_time - start_time:.2f} secondes."
 
-# Menu interactif
+# Menu interactif avec explications détaillées
 def show_menu():
     print("\n=== Menu des Tests de Performance ===")
     print("1. Test basique (statut, reset, ajout, recherche)")
-    print("2. Test avec plusieurs requêtes séquentielles")
-    print("3. Test avec des requêtes parallèles")
-    print("0. Quitter")
+    print("   - Ce test effectue une série d'actions basiques :")
+    print("     * Vérification du statut de FAISS pour voir si l'index est initialisé.")
+    print("     * Réinitialisation de l'index FAISS pour supprimer toutes les données actuelles.")
+    print("     * Ajout de plusieurs textes réalistes (environ 300 mots chacun) à l'index FAISS.")
+    print("     * Recherche de textes similaires dans l'index pour un texte donné.")
+    print("   - Ce test permet de s'assurer que toutes les fonctionnalités basiques de l'API fonctionnent correctement.")
+    
+    print("\n2. Test avec plusieurs requêtes séquentielles")
+    print("   - Ce test envoie un nombre défini de requêtes séquentielles à l'API pour rechercher des textes similaires.")
+    print("   - Les requêtes sont envoyées une par une, avec un court délai entre chacune pour éviter de surcharger le serveur.")
+    print("   - Ce test est utile pour mesurer les performances de l'API lorsque plusieurs requêtes sont envoyées en succession.")
+
+    print("\n3. Test avec des requêtes parallèles")
+    print("   - Ce test lance plusieurs requêtes en parallèle pour rechercher des textes similaires.")
+    print("   - Les requêtes sont exécutées simultanément, ce qui permet de tester la capacité de l'API à gérer des requêtes concurrentes.")
+    print("   - Ce test est utile pour évaluer la robustesse de l'API en situation de charge élevée, lorsque plusieurs utilisateurs effectuent des requêtes en même temps.")
+
+    print("\n0. Quitter")
     return input("Veuillez choisir une option : ")
+
 
 # Fonction principale
 def run_tests():
