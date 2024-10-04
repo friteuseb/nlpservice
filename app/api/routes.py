@@ -188,6 +188,15 @@ def find_similar():
         return jsonify({"error": str(e)}), 500
 
 
+@api_bp.route('/reset_faiss_index', methods=['POST'])
+def reset_faiss_index():
+    try:
+        current_app.faiss_similarity.clear_index()
+        return jsonify({"message": "FAISS index reset successfully"})
+    except Exception as e:
+        current_app.logger.error(f"Error resetting FAISS index: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
 @api_bp.route('/clear_faiss_index', methods=['POST'])
 @limiter.limit("1 per hour")
 def clear_faiss_index():
@@ -208,6 +217,57 @@ def clear_faiss_index():
     except Exception as e:
         current_app.logger.error(f"Erreur lors du nettoyage de l'index FAISS: {str(e)}", exc_info=True)
         return jsonify({"error": f"Error clearing FAISS index: {str(e)}"}), 500
+
+
+@api_bp.route('/test_faiss', methods=['GET'])
+def test_faiss():
+    try:
+        current_app.logger.info("Début du test FAISS")
+        
+        texts = [
+            "L'intelligence artificielle révolutionne de nombreux domaines.",
+            "Le machine learning est une branche importante de l'IA.",
+            "Les réseaux de neurones sont utilisés dans l'apprentissage profond."
+        ]
+        
+        items = [{"id": str(i+1), "text": text} for i, text in enumerate(texts)]
+        num_added = current_app.faiss_similarity.add_texts(items)
+        
+        status_after_add = current_app.faiss_similarity.get_status()
+        current_app.logger.info(f"Statut de l'index après ajout: {status_after_add}")
+        
+        query_id = "1"
+        results = current_app.faiss_similarity.find_similar(query_id, k=2)
+        
+        status_final = current_app.faiss_similarity.get_status()
+        current_app.logger.info(f"Statut final de l'index: {status_final}")
+        
+        if status_final['num_texts'] == 0:
+            current_app.logger.error("L'index a été vidé de manière inattendue")
+        
+        return jsonify({
+            "texts_added": num_added,
+            "search_results": results,
+            "query_id": query_id,
+            "index_status_after_add": status_after_add,
+            "index_status_final": status_final
+        })
+    except Exception as e:
+        current_app.logger.error(f"Erreur lors du test FAISS: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
+@api_bp.route('/faiss_status', methods=['GET'])
+def faiss_status():
+    try:
+        status = current_app.faiss_similarity.get_status()
+        is_consistent = current_app.faiss_similarity.check_consistency()
+        status['is_consistent'] = is_consistent
+        return jsonify(status)
+    except Exception as e:
+        current_app.logger.error(f"Error getting FAISS status: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
 
 @api_bp.errorhandler(429)
 def ratelimit_handler(e):

@@ -7,7 +7,7 @@ from logging.handlers import RotatingFileHandler
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from .nlp.analyzer import NLPAnalyzer
-from .nlp.faiss_similarity import FAISSSimilarity 
+from app.nlp.faiss_similarity import FAISSSimilarity
 from .api.routes import api_bp
 from .web.routes import web_bp
 from .config import Config
