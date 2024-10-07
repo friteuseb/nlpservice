@@ -2,44 +2,40 @@ import requests
 import json
 import time
 import threading
-
 import os
-import requests
 from dotenv import load_dotenv
-import json
-import time
-import threading
+import statistics
 
-# Charger les variables d'environnement depuis le fichier .env
+# Charger les variables d'environnement
 load_dotenv()
-
-# Récupérer la clé API à partir des variables d'environnement
 API_KEY = os.getenv('API_KEY')
-
 BASE_URL = "https://nlpservice.semantic-suggestion.com/api"
 
-# Fonction pour envoyer une requête à l'API avec l'API Key
 def send_request(endpoint, method='GET', data=None):
     url = f"{BASE_URL}/{endpoint}"
-    headers = {
-        "X-API-Key": API_KEY  # Utilisation de la clé API sécurisée
-    }
+    headers = {"X-API-Key": API_KEY}
+    start_time = time.time()
     try:
         if method == 'GET':
             response = requests.get(url, headers=headers)
         elif method == 'POST':
             response = requests.post(url, json=data, headers=headers)
         response.raise_for_status()
-        return response.json()
+        end_time = time.time()
+        return {
+            "success": True,
+            "data": response.json(),
+            "status_code": response.status_code,
+            "response_time": end_time - start_time
+        }
     except requests.exceptions.RequestException as e:
-        print(f"Erreur lors de la requête à {url}: {str(e)}")
-        return None
-
-# Exemple d'utilisation
-if __name__ == "__main__":
-    response = send_request("faiss_status")
-    print(json.dumps(response, indent=2) if response else "Aucune réponse reçue.")
-
+        end_time = time.time()
+        return {
+            "success": False,
+            "error": str(e),
+            "status_code": getattr(e.response, 'status_code', None),
+            "response_time": end_time - start_time
+        }
 
 # Textes réalistes de 300 mots environ
 def realistic_texts():
@@ -79,74 +75,86 @@ def realistic_texts():
          "impacts éthiques de l'exploration et de la colonisation de nouveaux mondes."}
     ]
 
-# Test de performance simple (statut, reset, ajout, recherche)
+def generate_detailed_report(test_name, results):
+    print(f"\n=== Rapport détaillé pour {test_name} ===")
+    success_rate = sum(1 for r in results if r['success']) / len(results) * 100
+    avg_response_time = statistics.mean(r['response_time'] for r in results)
+    
+    print(f"Taux de succès: {success_rate:.2f}%")
+    print(f"Temps de réponse moyen: {avg_response_time:.4f} secondes")
+    
+    if results:
+        print("\nDétails des requêtes:")
+        for i, result in enumerate(results, 1):
+            print(f"  Requête {i}:")
+            print(f"    Succès: {'Oui' if result['success'] else 'Non'}")
+            print(f"    Temps de réponse: {result['response_time']:.4f} secondes")
+            print(f"    Code de statut: {result['status_code']}")
+            if result['success']:
+                print(f"    Données reçues: {json.dumps(result['data'], indent=2)}")
+            else:
+                print(f"    Erreur: {result['error']}")
+            print()
+
 def basic_test():
-    start_time = time.time()
-
-    print("\n1. Vérification du statut initial...")
-    status = send_request("faiss_status")
-    if not status:
-        return "Échec lors de la vérification du statut initial."
-    print("Statut initial obtenu.")
-
-    print("\n2. Réinitialisation de l'index FAISS...")
+    results = []
+    print("\nExécution du test basique...")
+    
+    # 1. Vérification du statut initial
+    print("1. Vérification du statut initial...")
+    status_result = send_request("faiss_status")
+    results.append(status_result)
+    
+    # 2. Réinitialisation de l'index FAISS
+    print("2. Réinitialisation de l'index FAISS...")
     reset_result = send_request("reset_faiss_index", method='POST')
-    if reset_result:
-        print("Index réinitialisé avec succès.")
-    else:
-        return "Échec lors de la réinitialisation de l'index."
-
-    print("\n3. Ajout de textes réalistes dans l'index FAISS...")
+    results.append(reset_result)
+    
+    # 3. Ajout de textes réalistes
+    print("3. Ajout de textes réalistes dans l'index FAISS...")
     texts = realistic_texts()
     add_result = send_request("add_texts", method='POST', data={"items": texts})
-    if add_result:
-        print("Textes ajoutés avec succès.")
-    else:
-        return "Échec lors de l'ajout des textes."
-
-    print("\n4. Recherche de textes similaires...")
+    results.append(add_result)
+    
+    # 4. Recherche de textes similaires
+    print("4. Recherche de textes similaires...")
     similar_result = send_request("find_similar", method='POST', data={"id": "1", "k": 3})
-    if similar_result:
-        print("Recherche de textes similaires effectuée avec succès.")
-    else:
-        return "Échec lors de la recherche de textes similaires."
+    results.append(similar_result)
+    
+    generate_detailed_report("Test Basique", results)
 
-    end_time = time.time()
-    return f"Test basique terminé en {end_time - start_time:.2f} secondes."
-
-# Test avec plusieurs requêtes séquentielles
 def multiple_requests_test(num_requests=10):
-    start_time = time.time()
+    results = []
     print(f"\nEnvoi de {num_requests} requêtes séquentielles...")
-
+    
     for i in range(1, num_requests + 1):
         print(f"  - Requête {i} sur {num_requests}...")
-        send_request("find_similar", method='POST', data={"id": "1", "k": 3})
+        result = send_request("find_similar", method='POST', data={"id": "1", "k": 3})
+        results.append(result)
         time.sleep(0.1)  # Pause pour éviter la surcharge
-
-    end_time = time.time()
-    return f"Test avec {num_requests} requêtes séquentielles terminé en {end_time - start_time:.2f} secondes."
-
-# Test avec des requêtes parallèles
-def parallel_requests_test(num_threads=10):
-    def send_similar_request_threaded(id, k):
-        send_request("find_similar", method='POST', data={"id": id, "k": k})
     
-    start_time = time.time()
-    threads = []
-    print(f"\nLancement de {num_threads} requêtes parallèles...")
+    generate_detailed_report(f"Test avec {num_requests} requêtes séquentielles", results)
 
+def parallel_requests_test(num_threads=10):
+    results = []
+    threads = []
+    
+    def send_similar_request_threaded(id, k):
+        result = send_request("find_similar", method='POST', data={"id": id, "k": k})
+        results.append(result)
+    
+    print(f"\nLancement de {num_threads} requêtes parallèles...")
+    
     for i in range(1, num_threads + 1):
         print(f"  - Démarrage de la requête parallèle {i}...")
         thread = threading.Thread(target=send_similar_request_threaded, args=(str(i), 3))
         threads.append(thread)
         thread.start()
-
+    
     for thread in threads:
         thread.join()
-
-    end_time = time.time()
-    return f"Test avec {num_threads} requêtes parallèles terminé en {end_time - start_time:.2f} secondes."
+    
+    generate_detailed_report(f"Test avec {num_threads} requêtes parallèles", results)
 
 # Menu interactif avec explications détaillées
 def show_menu():
@@ -172,29 +180,23 @@ def show_menu():
     print("\n0. Quitter")
     return input("Veuillez choisir une option : ")
 
-
-# Fonction principale
 def run_tests():
     while True:
         choice = show_menu()
         if choice == '1':
-            result = basic_test()
+            basic_test()
         elif choice == '2':
             num_requests = int(input("Entrez le nombre de requêtes séquentielles : "))
-            result = multiple_requests_test(num_requests)
+            multiple_requests_test(num_requests)
         elif choice == '3':
             num_threads = int(input("Entrez le nombre de requêtes parallèles : "))
-            result = parallel_requests_test(num_threads)
+            parallel_requests_test(num_threads)
         elif choice == '0':
             print("Merci d'avoir utilisé le testeur de performance.")
             break
         else:
             print("Choix invalide, veuillez réessayer.")
             continue
-
-        print("\n=== Compte Rendu du Test ===")
-        print(result)
-        print("\n============================")
 
 if __name__ == "__main__":
     run_tests()
