@@ -5,6 +5,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask import request, jsonify
 from ..nlp.similarity_calculator import SimilarityCalculator
+from functools import wraps
 import asyncio
 import base64
 from concurrent.futures import ThreadPoolExecutor
@@ -14,6 +15,16 @@ limiter = Limiter(key_func=get_remote_address)
 api_bp = Blueprint('api', __name__)
 nlp_analyzer = NLPAnalyzer()
 similarity_calculator = SimilarityCalculator()
+
+def flexible_limiter(limit_string):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if current_app.config['RATE_LIMIT_ENABLED']:
+                return limiter.limit(limit_string)(f)(*args, **kwargs)
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 @api_bp.route('/analyze', methods=['POST'])
 @limiter.limit("5 per minute")
