@@ -4,6 +4,7 @@ nlp_env/
 nlp_env_new/
 .env/
 .env
+faiss_env/
 
 # Ignore les fichiers de logs
 *.log*
