@@ -16,15 +16,19 @@ from dotenv import load_dotenv
 
 load_dotenv()  # Charge les variables d'environnement depuis .env
 
+# Vérification de la valeur de RATE_LIMIT_ENABLED
+rate_limit_enabled = os.getenv('RATE_LIMIT_ENABLED', 'true').lower() == 'true'
+print(f"RATE_LIMIT_ENABLED: {rate_limit_enabled}")
+
 gc.set_threshold(700, 10, 10)
 
 def rate_limit_key_func():
-    api_key = request.headers.get('X-API-Key')
-    if api_key and api_key == Config.API_KEY:
-        return "no_limit"  # Cette clé spéciale ne sera pas limitée
-    return get_remote_address()
+    return "no_limit" if not rate_limit_enabled else get_remote_address()
 
-limiter = Limiter(key_func=rate_limit_key_func, default_limits=["200 per day", "50 per hour"])
+limiter = Limiter(
+    key_func=rate_limit_key_func,
+    default_limits=["200 per day", "50 per hour"] if rate_limit_enabled else []
+)
 
 nltk_resources_loaded = False
 
